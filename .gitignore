@@ -50,3 +50,7 @@ supabase/.temp/
 
 # ai tooling
 .claude/
+
+# local docs (not for the repo)
+DESIGN.md
+docs/supabase.md
