@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OOUX для дизайнеров — Трекер откликов на вакансии</title>
+<style>
+  :root {
+    --bg: #0f0f10;
+    --surface: #1a1a1d;
+    --surface-2: #232327;
+    --border: #2e2e34;
+    --text: #f4f4f5;
+    --muted: #9ca0a8;
+    --accent: #5ee2a0;
+    --accent-soft: #5ee2a022;
+    --object: #5ee2a0;
+    --attr: #c5b4ff;
+    --cta: #ff9d8a;
+    --content: #ffd479;
+    --code-bg: #18181b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  .app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+  .brand { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .brand h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .brand p { font-size: 12px; color: var(--muted); margin: 0; }
+  .lesson-list { list-style: none; padding: 0; margin: 0; }
+  .lesson-item {
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s ease;
+  }
+  .lesson-item:hover { color: var(--text); background: var(--surface-2); }
+  .lesson-item.active {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+  }
+  .lesson-num {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    width: 20px;
+  }
+  .lesson-item.active .lesson-num { color: var(--accent); }
+
+  .main { display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+  .topbar {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .topbar h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+  .topbar .progress { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .content {
+    overflow-y: auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .lesson-text h3 { font-size: 22px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .lesson-text .subtitle { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .lesson-text p { font-size: 14px; }
+  .designer-note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .designer-note strong { color: var(--accent); }
+  code.inline {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+
+  /* Workspace */
+  .workspace { position: sticky; top: 0; display: flex; flex-direction: column; gap: 12px; }
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-label button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .panel-label button:hover { color: var(--text); border-color: var(--muted); }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 380px;
+  }
+
+  /* Story chips */
+  .story { font-size: 14px; line-height: 1.7; color: var(--text); }
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 0 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+    border: 1px dashed transparent;
+  }
+  .chip:hover { background: var(--surface-2); border-color: var(--border); }
+  .chip.selected {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .feedback { margin-top: 16px; font-size: 13px; color: var(--muted); min-height: 20px; }
+
+  /* Worksheet inputs */
+  textarea.sheet, input.sheet {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    resize: vertical;
+  }
+  textarea.sheet { min-height: 70px; line-height: 1.5; }
+  textarea.sheet:focus, input.sheet:focus { border-color: var(--accent); }
+  .sheet-block { margin-bottom: 14px; }
+  .sheet-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .sheet-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .object-block {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+    background: var(--surface-2);
+  }
+  .object-block-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .object-pill {
+    background: var(--object);
+    color: #062818;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .saved-indicator {
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .saved-indicator.show { opacity: 1; }
+
+  /* Categorizer */
+  .categorize-zone {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .zone {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 12px 10px;
+    min-height: 100px;
+  }
+  .zone h5 {
+    font-size: 11px;
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .zone.obj h5 { color: var(--object); }
+  .zone.atr h5 { color: var(--attr); }
+  .zone.cnt h5 { color: var(--content); }
+  .zone-items { display: flex; flex-direction: column; gap: 4px; }
+  .zone-item {
+    font-size: 12px;
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .zone-item:hover { border-color: var(--muted); }
+  .pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 10px;
+    background: var(--code-bg);
+    border-radius: 6px;
+    min-height: 40px;
+  }
+  .pool-item {
+    font-size: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .pool-item:hover { border-color: var(--accent); }
+
+  /* Checklist */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+  }
+  .check-item label { flex: 1; cursor: pointer; }
+  .check-item .hint { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Bottom nav */
+  .bottombar {
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .btn {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #062818;
+    font-weight: 700;
+  }
+  .btn.primary:hover:not(:disabled) { background: #7eebb5; border-color: #7eebb5; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>OOUX для дизайнеров</h1>
+      <p>Проектирование трекера откликов на вакансии.</p>
+    </div>
+    <ul class="lesson-list" id="lessonList"></ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h2 id="topTitle">—</h2>
+      <span class="progress" id="progress">0 / 0</span>
+    </header>
+
+    <section class="content">
+      <div class="lesson-text" id="lessonText"></div>
+      <div class="workspace" id="workspace"></div>
+    </section>
+
+    <footer class="bottombar">
+      <button class="btn" id="prevBtn">← Назад</button>
+      <button class="btn primary" id="nextBtn">Далее →</button>
+    </footer>
+  </main>
+</div>
+
+<script>
+// ─── Persistent state ────────────────────────────────────────────────────
+const STORAGE_KEY = "ooux_workbook_v1";
+const work = (() => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+})();
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(work)); } catch {}
+  document.querySelectorAll(".saved-indicator").forEach(el => {
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 800);
+  });
+}
+function bindInput(el, key) {
+  el.value = work[key] || "";
+  el.addEventListener("input", () => { work[key] = el.value; save(); });
+}
+
+function normalizeWord(word) {
+  return word.toLowerCase().replace(/[^а-яёa-z]/gi, "");
+}
+
+const SORT_NOUNS = [
+  { key: "отклик", forms: ["отклик", "отклика"] },
+  { key: "список", forms: ["список"] },
+  { key: "вакансия", forms: ["вакансию", "вакансия"] },
+  { key: "дата", forms: ["дату", "дата"] },
+  { key: "собеседование", forms: ["собеседование", "собеседования"] },
+  { key: "роль", forms: ["роль"] },
+  { key: "дизайнер", forms: ["дизайнера", "дизайнер"] },
+  { key: "неделя", forms: ["неделю", "неделя"] },
+  { key: "статус", forms: ["статус"] },
+  { key: "заметка", forms: ["заметку", "заметка"] },
+  { key: "напоминание", forms: ["напоминание"] },
+  { key: "рекрутер", forms: ["рекрутер"] },
+  { key: "компании", forms: ["компаний", "компании"] },
+  { key: "этап", forms: ["этапу", "этап"] },
+];
+
+const NOUN_STORY =
+  "Дарья ищет роль старшего продуктового дизайнера. Каждую неделю она откликается в несколько компаний и сохраняет вакансию. После отклика она фиксирует дату и статус. Иногда рекрутер выходит на связь и назначает собеседование. После каждого собеседования она записывает короткую заметку. Ей нужен список каждого отклика, отсортированный по этапу, и напоминание о том, что будет дальше.";
+
+const FORM_TO_KEY = {};
+SORT_NOUNS.forEach(({ key, forms }) => {
+  forms.forEach((form) => {
+    FORM_TO_KEY[normalizeWord(form)] = key;
+  });
+});
+
+const LEGACY_NOUN_KEYS = {
+  application: "отклик",
+  list: "список",
+  posting: "вакансия",
+  date: "дата",
+  interview: "собеседование",
+  role: "роль",
+  designer: "дизайнер",
+  week: "неделя",
+  status: "статус",
+  note: "заметка",
+  reminder: "напоминание",
+  recruiter: "рекрутер",
+  companies: "компании",
+  stage: "этап",
+};
+
+function migrateStoredNouns() {
+  delete work.nouns;
+  if (work.cats) {
+    Object.entries({ ...work.cats }).forEach(([noun, cat]) => {
+      const key = LEGACY_NOUN_KEYS[noun] || noun;
+      if (key !== noun) {
+        work.cats[key] = cat;
+        delete work.cats[noun];
+      }
+    });
+  }
+}
+migrateStoredNouns();
+
+// ─── Lessons ─────────────────────────────────────────────────────────────
+const lessons = [
+  // 1. INTRO + BRIEF
+  {
+    title: "Что такое OOUX?",
+    subtitle: "",
+    body: () => `
+      <p><strong>OOUX</strong> — объектно-ориентированный пользовательский опыт. Вместо того чтобы сразу рисовать экраны, вы начинаете с карты <strong>объектов</strong> (существительных) продукта — и с того, что они делают, что описывают и как связаны между собой.</p>
+      <p>Зачем? Пользователи не думают экранами. Они думают <em>вещами</em>: «мои отклики», «эта компания», «собеседование в пятницу». Если модель данных хаотична, экраны тоже будут хаотичными.</p>
+      <div class="designer-note">
+        <strong>Процесс ORCA:</strong><br>
+        <strong>O</strong>bjects → <strong>R</strong>elationships → <strong>C</strong>alls to action → <strong>A</strong>ttributes
+      </div>
+      <p>Справа — ваша рабочая тетрадь. Всё, что вы вводите, сохраняется в браузере: можно закрыть вкладку и вернуться — работа останется на месте.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label">Описание проекта</div>
+      <div class="panel">
+        <h3 style="margin:0 0 12px;font-size:18px;">Трекер откликов на вакансии</h3>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 16px;">Простое веб-приложение, которое помогает отслеживать, куда вы откликались, на каком этапе каждый отклик и что делать дальше.</p>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div class="panel-label" style="margin-bottom:8px;">Вероятные цели пользователя</div>
+          <ul style="font-size:13px;margin:0;padding-left:20px;color:var(--muted);">
+            <li>Не терять отклики из виду</li>
+            <li>Видеть, какое действие нужно сделать следующим</li>
+            <li>Анализировать, что работает, а что нет</li>
+          </ul>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px;font-size:12px;color:var(--muted);">
+          <strong>К уроку 10 у вас будет:</strong> список объектов, их атрибуты, призывы к действию, связи и список экранов — достаточно, чтобы уверенно начать наброски экранов.
+        </div>
+      </div>
+    `,
+  },
+
+  // 2. NOUN HUNT
+  {
+    title: "Охота на существительные",
+    subtitle: "Объекты прячутся на виду.",
+    body: () => `
+      <p>Первый шаг в OOUX: прочитать пользовательскую историю и <strong>обвести каждое существительное</strong>. Существительные — кандидаты: большинство станут объектами, атрибутами или содержимым в системе.</p>
+      <p>Справа — пример истории для трекера. Нажимайте на слова, которые ощущаются как «вещь» — то, что можно сохранить, посчитать, вывести списком или отфильтровать.</p>
+      <p>Ищите: людей, места, предметы, события, статусы, документы.</p>
+    `,
+    workspace: () => {
+      const tokens = NOUN_STORY.split(/(\s+|[,.])/u).map((t) => {
+        const key = FORM_TO_KEY[normalizeWord(t)];
+        if (key) return `<span class="chip" data-noun="${key}">${t}</span>`;
+        return t;
+      }).join("");
+      return `
+        <div class="panel-label"><span>Нажмите на существительные</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          <p class="story">${tokens}</p>
+          <div class="feedback" id="feedback">Выбрано: 0</div>
+        </div>
+      `;
+    },
+    init: () => {
+      const selected = new Set();
+      const fb = document.getElementById("feedback");
+      const update = () => {
+        fb.textContent = `Выбрано: ${selected.size}`;
+      };
+      document.querySelectorAll(".chip").forEach((c) => {
+        const n = c.dataset.noun;
+        c.onclick = () => {
+          c.classList.toggle("selected");
+          if (selected.has(n)) selected.delete(n);
+          else selected.add(n);
+          update();
+        };
+      });
+      update();
+    },
+  },
+
+  // 3. CATEGORIZE
+  {
+    title: "Сортировка: объект, атрибут или содержимое?",
+    subtitle: "Три типа существительных.",
+    body: () => `
+      <p>Не каждое существительное становится объектом. Разложите каждое по одной из трёх корзин:</p>
+      <ul>
+        <li><strong style="color:var(--object);">ОБЪЕКТЫ</strong> — самостоятельные сущности, которым нужна отдельная страница или карточка. У них есть собственная идентичность. <em>(например, Клиент, Заказ, Товар)</em></li>
+        <li><strong style="color:var(--attr);">АТРИБУТЫ</strong> — короткие факты, описывающие объект. <em>(например, имя, цена, дата)</em></li>
+        <li><strong style="color:var(--content);">СОДЕРЖИМОЕ</strong> — длинный текст или медиафайлы, живущие на объекте. <em>(например, отзыв, описание, заметка)</em></li>
+      </ul>
+      <div class="designer-note">
+        <strong>Быстрый тест для объектов:</strong> можно ли сказать «все мои ___» и получить осмысленный список? «Все мои клиенты» → да, объект. «Все мои цены» → нет, атрибут.
+      </div>
+      <p>Справа перетащите найденные существительные в одну из трёх зон. Не переусложняйте — доверяйте первому инстинкту.</p>
+    `,
+    workspace: () => {
+      work.cats = work.cats || {};
+      const placed = new Set(Object.keys(work.cats));
+      const pool = SORT_NOUNS.filter((n) => !placed.has(n.key));
+      const zoneItems = (cat) =>
+        Object.keys(work.cats)
+          .filter((n) => work.cats[n] === cat)
+          .map(
+            (n) =>
+              `<div class="zone-item" data-noun="${n}" data-from="${cat}">${n}</div>`
+          )
+          .join("");
+      return `
+        <div class="panel-label"><span>Отсортируйте существительные</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Нажмите слово в общем списке, затем — зону, куда его отправить. Нажмите элемент в зоне, чтобы вернуть обратно.</div>
+          <div class="pool" id="pool">${pool.map((n) => `<span class="pool-item" data-noun="${n.key}">${n.key}</span>`).join("")}</div>
+          <div class="categorize-zone">
+            <div class="zone obj" data-cat="object"><h5>Объект</h5><div class="zone-items">${zoneItems("object")}</div></div>
+            <div class="zone atr" data-cat="attribute"><h5>Атрибут</h5><div class="zone-items">${zoneItems("attribute")}</div></div>
+            <div class="zone cnt" data-cat="content"><h5>Содержимое</h5><div class="zone-items">${zoneItems("content")}</div></div>
+          </div>
+        </div>
+      `;
+    },
+    init: () => {
+      let selected = null;
+      const refresh = () => loadLesson(currentIdx, true);
+      document.querySelectorAll(".pool-item").forEach(el => {
+        el.onclick = () => {
+          document.querySelectorAll(".pool-item").forEach(p => p.style.outline = "");
+          if (selected === el.dataset.noun) { selected = null; return; }
+          selected = el.dataset.noun;
+          el.style.outline = "2px solid var(--accent)";
+        };
+      });
+      document.querySelectorAll(".zone").forEach(z => {
+        z.onclick = () => {
+          if (!selected) return;
+          work.cats[selected] = z.dataset.cat;
+          selected = null;
+          save(); refresh();
+        };
+      });
+      document.querySelectorAll(".zone-item").forEach(el => {
+        el.onclick = () => {
+          delete work.cats[el.dataset.noun];
+          save(); refresh();
+        };
+      });
+    },
+  },
+
+  // 4. DEFINE OBJECTS
+  {
+    title: "Зафиксируйте объекты",
+    subtitle: "Выберите 3–5 ключевых.",
+    body: () => `
+      <p>Посмотрите, что попало в зону <strong>Объект</strong> на прошлом уроке. Часть останется, часть можно объединить или убрать. Цель — определить <strong>3–5 основных объектов</strong> для инструмента такого масштаба.</p>
+      <p>На что обратить внимание:</p>
+      <ul>
+        <li>Можно ли объединить два объекта? (например, «вакансия» и «отклик» — это одно и то же?)</li>
+        <li>Не упустили ли вы что-то? Иногда самый важный объект даже не упомянут в истории.</li>
+        <li>Будет ли у объекта отдельный экран? Если нет — скорее всего, это атрибут.</li>
+      </ul>
+      <div class="designer-note">
+        <strong>Правило большого пальца:</strong> 3 объекта — вероятно, мало. 8 — вероятно, много. Ищите золотую середину.
+      </div>
+      <p>Впишите финальный список объектов справа. По одному на строку.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Ваши основные объекты</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <label class="sheet-label">Список из 3–5 объектов, по одному на строку:</label>
+        <textarea class="sheet" id="objList" rows="6" placeholder="Отклик&#10;Компания&#10;..."></textarea>
+        <div class="sheet-hint">Используйте единственное число (Отклик, а не Отклики). Это станет строками вашей объектной карты.</div>
+      </div>
+    `,
+    init: () => {
+      const t = document.getElementById("objList");
+      bindInput(t, "objects_text");
+    },
+  },
+
+  // 5. ATTRIBUTES
+  {
+    title: "Добавьте атрибуты",
+    subtitle: "Что описывает каждый объект?",
+    body: () => `
+      <p>Для каждого объекта перечислите короткие факты, которые его описывают. То, что поместится на ярлыке, в колонке таблицы или в фильтре.</p>
+      <p>Примеры для объекта <strong>Заказ</strong>: <em>номер заказа, сумма, дата оформления, имя клиента, статус</em>.</p>
+      <div class="designer-note">
+        <strong>Будьте щедры.</strong> Запишите все атрибуты, даже мелкие. Приоритизируете позже. Пропущенный атрибут сейчас = пробел в функционале потом.
+      </div>
+      <p>Не включайте длинный текст — это «содержимое», оно обрабатывается отдельно. Только короткие структурированные поля.</p>
+    `,
+    workspace: () => buildObjectSheets("attrs", "атрибуты", "например: роль, дата отклика, зарплата, источник, статус"),
+    init: () => bindObjectSheets("attrs"),
+  },
+
+  // 6. CTAs
+  {
+    title: "Добавьте призывы к действию",
+    subtitle: "Что пользователь может СДЕЛАТЬ с каждым объектом?",
+    body: () => `
+      <p>Для каждого объекта перечислите глаголы. Призывы к действию бывают трёх типов:</p>
+      <ul>
+        <li><strong>Создание</strong> — «Добавить отклик», «Записать собеседование»</li>
+        <li><strong>Изменение</strong> — «Редактировать», «Перевести на предложение о работе», «Добавить заметку»</li>
+        <li><strong>Взаимодействие</strong> — «Открыть», «Поделиться», «Архивировать»</li>
+      </ul>
+      <div class="designer-note">
+        <strong>Совет:</strong> если действие логично только с экрана другого объекта — всё равно запишите. («Со страницы Компании хочу: видеть все отклики в эту компанию».)
+      </div>
+      <p>Стремитесь к 3–6 действиям на объект. Используйте глаголы.</p>
+    `,
+    workspace: () => buildObjectSheets("ctas", "действия", "например: Добавить, Редактировать, Сменить этап, Добавить заметку, Архивировать"),
+    init: () => bindObjectSheets("ctas"),
+  },
+
+  // 7. RELATIONSHIPS
+  {
+    title: "Свяжите объекты",
+    subtitle: "Как объекты соединены.",
+    body: () => `
+      <p>Объекты редко живут изолированно. Опишите связи простыми предложениями:</p>
+      <p style="font-family:'SF Mono',Menlo,monospace;font-size:13px;background:var(--code-bg);padding:8px 12px;border-radius:6px;">[Объект А] имеет много [Объект Б]<br>[Объект А] принадлежит одному [Объект Б]</p>
+      <p>Для каждой связи спросите:</p>
+      <ol>
+        <li><strong>Один или много?</strong> У одного А много Б или наоборот?</li>
+        <li><strong>Обязательно или опционально?</strong> Каждый А должен иметь Б?</li>
+      </ol>
+      <div class="designer-note">
+        <strong>Зачем это дизайнеру:</strong> связи определяют навигацию. Если <em>Отклик имеет много Собеседований</em>, на детальной странице отклика нужен список собеседований. Каждое «имеет много» обычно означает список внутри детального экрана.
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Ваши связи</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <label class="sheet-label">Каждую связь — на отдельной строке:</label>
+        <textarea class="sheet" id="relText" rows="8" placeholder="Компания имеет много Откликов&#10;Отклик имеет много Собеседований&#10;Контакт принадлежит одной Компании&#10;..."></textarea>
+        <div class="sheet-hint">Стремитесь к 4–6 связям. Больше — возможно, слишком большой объём проекта.</div>
+      </div>
+    `,
+    init: () => bindInput(document.getElementById("relText"), "relationships_text"),
+  },
+
+  // 8. NESTING
+  {
+    title: "Найдите вложенные объекты",
+    subtitle: "Объекты внутри объектов.",
+    body: () => `
+      <p>Когда один объект показывается внутри экрана другого, он <strong>вложен</strong>. На экране это выглядит как карточка в карточке или список на детальной странице.</p>
+      <p>Общий пример: на <em>экране корзины</em> виден объект Корзина с вложенными карточками Товара (по одной на позицию). Товар — отдельный объект, но здесь показан в урезанном виде: изображение, название, цена. На полной странице товара — гораздо больше.</p>
+      <div class="designer-note">
+        <strong>Правило дизайна:</strong> при вложении объекта выберите 2–3 самых важных атрибута для показа. Полная версия живёт на отдельной странице.
+      </div>
+      <p>Посмотрите на связи из урока 7. Каждое «имеет много» намекает на вложение. Запишите, какие объекты появляются <em>внутри</em> каких других.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Ваши вложенные объекты</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <label class="sheet-label">Где каждый объект показывается вложенным в другой:</label>
+        <textarea class="sheet" id="nestText" rows="8" placeholder="На детальной странице Отклика показать:&#10;– мини-карточку Компании (логотип, название, размер)&#10;– список Собеседований (дата, тип, статус)&#10;..."></textarea>
+        <div class="sheet-hint">Для каждого вложенного объекта укажите 2–3 атрибута для компактной формы.</div>
+      </div>
+    `,
+    init: () => bindInput(document.getElementById("nestText"), "nesting_text"),
+  },
+
+  // 9. PRIORITIZATION
+  {
+    title: "Приоритизируйте атрибуты",
+    subtitle: "Что заслуживает верхнюю строку?",
+    body: () => `
+      <p>У объекта может быть 15 атрибутов — но в списке на карточку помещаются только 2–3. Выберите, какие попадут наверх.</p>
+      <p>Для <strong>самого важного объекта</strong> (вероятно, Отклик) ранжируйте три главных атрибута для карточки в списке.</p>
+      <div class="designer-note">
+        <strong>Приём для иерархии:</strong> три главных атрибута на объект должны отвечать на вопросы: «Что это?», «К чему относится?», «В каком состоянии?»
+      </div>
+      <p>Подумайте и об остальных объектах — даже три главных для каждого даст основу для всех карточек и строк в интерфейсе.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Приоритеты для списка</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <label class="sheet-label">Для каждого объекта — три главных атрибута на карточке:</label>
+        <textarea class="sheet" id="prioText" rows="10" placeholder="Отклик:&#10;1. Роль&#10;2. Компания&#10;3. Этап&#10;&#10;Компания:&#10;1. ...&#10;..."></textarea>
+        <div class="sheet-hint">Если не можете выбрать 3 — объект, возможно, недостаточно существенный или атрибутов пока мало.</div>
+      </div>
+    `,
+    init: () => bindInput(document.getElementById("prioText"), "priorities_text"),
+  },
+
+  // 10. SCREENS
+  {
+    title: "Составьте список экранов",
+    subtitle: "От карты к информационной архитектуре.",
+    body: () => `
+      <p>Каждый объект обычно порождает три вида экранов:</p>
+      <ol>
+        <li><strong>Коллекция</strong> — список всех экземпляров (например, «Все отклики»)</li>
+        <li><strong>Детальный</strong> — один экземпляр, полностью раскрытый</li>
+        <li><strong>Создание/редактирование</strong> — форма добавления или изменения</li>
+      </ol>
+      <p>Но не каждому объекту нужны все три. <strong>Вложенные объекты</strong> из урока 8 могут обойтись без своей страницы — они живут внутри детального экрана другого объекта.</p>
+      <div class="designer-note">
+        <strong>От карты к архитектуре:</strong> верхняя навигация должна соответствовать самым важным объектам. Самый используемый объект — вероятно, главный экран.
+      </div>
+      <p>Справа набросайте список экранов и верхнее меню. Это мост от OOUX к наброскам экранов.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Ваш список экранов</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Верхняя навигация (3–4 пункта)</label>
+          <input class="sheet" id="navText" placeholder="например: Отклики · Компании · Контакты">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Полный список экранов</label>
+          <textarea class="sheet" id="screenText" rows="10" placeholder="– Список откликов (главная)&#10;– Детальная страница отклика&#10;– Форма нового отклика&#10;– Список компаний&#10;– Детальная страница компании&#10;..."></textarea>
+        </div>
+      </div>
+    `,
+    init: () => {
+      bindInput(document.getElementById("navText"), "nav_text");
+      bindInput(document.getElementById("screenText"), "screens_text");
+    },
+  },
+
+  // 11. CHECKLIST
+  {
+    title: "Итоговый контрольный список",
+    subtitle: "Убедитесь, что артефакт OOUX полный.",
+    body: () => `
+      <p>Перед открытием Фигмы пройдитесь по списку. Каждый пункт — то, на что вы можете указать в рабочей тетради.</p>
+      <p>Если чего-то не хватает или неясно — вернитесь назад. Смысл OOUX в том, чтобы наброски экранов делались быстро и уверенно — а это работает только при прочном фундаменте.</p>
+      <div class="designer-note">
+        <strong>Готовый артефакт</strong> может жить в Фигме, Ноушне или даже в этой тетради. Важно, чтобы другой дизайнер (или разработчик) прочитал его и понял модель данных и информационную архитектуру без единого уточняющего вопроса.
+      </div>
+    `,
+    workspace: () => {
+      const items = [
+        ["Определены 3–5 основных объектов", "Зафиксированы на уроке 4."],
+        ["У каждого объекта не менее 4 атрибутов", "Описаны на уроке 5."],
+        ["У каждого объекта не менее 3 действий", "Глаголы с урока 6."],
+        ["Связи между объектами описаны", "С урока 7. Каждое «имеет много» подразумевает вложенный вид."],
+        ["Вложенные объекты определены", "Урок 8. Решите, какие атрибуты показывать во вложенной форме."],
+        ["Три главных атрибута на объект расставлены", "Урок 9. Определяет раскладку карточек и строк."],
+        ["Верхняя навигация определена", "Урок 10. Обычно совпадает с главными объектами."],
+        ["Полный список экранов набросан", "Урок 10. Каждый объект × (список, деталь, создание) — минус вложенные."],
+      ];
+      work.checks = work.checks || {};
+      return `
+        <div class="panel-label"><span>Контрольный список артефакта</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="chk${i}" ${work.checks[i] ? "checked" : ""}>
+              <label for="chk${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+];
+
+// ─── Helpers for repeated patterns ───────────────────────────────────────
+function getObjects() {
+  return (work.objects_text || "").split("\n").map(s => s.trim()).filter(Boolean);
+}
+function buildObjectSheets(field, label, placeholder) {
+  const objs = getObjects();
+  if (objs.length === 0) {
+    return `
+      <div class="panel-label">${label}</div>
+      <div class="panel">
+        <p style="font-size:13px;color:var(--muted);">Объектов пока нет. Вернитесь к уроку 4 и составьте список объектов — затем вернитесь сюда, чтобы добавить ${label} для каждого.</p>
+      </div>
+    `;
+  }
+  work[field] = work[field] || {};
+  return `
+    <div class="panel-label"><span>${label} по объектам</span><span class="saved-indicator">сохранено</span></div>
+    <div class="panel">
+      ${objs.map(o => `
+        <div class="object-block">
+          <div class="object-block-title"><span class="object-pill">${o}</span></div>
+          <textarea class="sheet" data-obj="${o}" data-field="${field}" rows="3" placeholder="${placeholder}"></textarea>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+function bindObjectSheets(field) {
+  document.querySelectorAll(`textarea[data-field="${field}"]`).forEach(t => {
+    const o = t.dataset.obj;
+    work[field] = work[field] || {};
+    t.value = work[field][o] || "";
+    t.addEventListener("input", () => {
+      work[field][o] = t.value;
+      save();
+    });
+  });
+}
+
+// ─── Rendering ───────────────────────────────────────────────────────────
+const lessonListEl = document.getElementById("lessonList");
+const lessonTextEl = document.getElementById("lessonText");
+const workspaceEl = document.getElementById("workspace");
+const topTitle = document.getElementById("topTitle");
+const progress = document.getElementById("progress");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+let currentIdx = 0;
+
+function buildSidebar() {
+  lessonListEl.innerHTML = "";
+  lessons.forEach((l, i) => {
+    const li = document.createElement("li");
+    li.className = "lesson-item" + (i === currentIdx ? " active" : "") + (i < currentIdx ? " done" : "");
+    li.innerHTML = `<span class="lesson-num">${String(i + 1).padStart(2, "0")}</span><span>${l.title}</span>`;
+    li.onclick = () => loadLesson(i);
+    lessonListEl.appendChild(li);
+  });
+}
+
+function loadLesson(i, keepIndex = false) {
+  if (!keepIndex) currentIdx = i;
+  const l = lessons[currentIdx];
+  topTitle.textContent = l.title;
+  progress.textContent = `${currentIdx + 1} / ${lessons.length}`;
+  lessonTextEl.innerHTML = `
+    <h3>${l.title}</h3>
+    ${l.subtitle ? `<p class="subtitle">${l.subtitle}</p>` : ""}
+    ${l.body()}
+  `;
+  workspaceEl.innerHTML = l.workspace();
+  if (l.init) l.init();
+  buildSidebar();
+  prevBtn.disabled = currentIdx === 0;
+  nextBtn.disabled = currentIdx === lessons.length - 1;
+  if (!keepIndex) {
+    try { localStorage.setItem("ooux_lesson", currentIdx); } catch {}
+  }
+}
+
+prevBtn.onclick = () => currentIdx > 0 && loadLesson(currentIdx - 1);
+nextBtn.onclick = () => currentIdx < lessons.length - 1 && loadLesson(currentIdx + 1);
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight" && !nextBtn.disabled) nextBtn.click();
+  if (e.key === "ArrowLeft" && !prevBtn.disabled) prevBtn.click();
+});
+
+let saved = 0;
+try { saved = parseInt(localStorage.getItem("ooux_lesson")) || 0; } catch {}
+loadLesson(Math.min(saved, lessons.length - 1));
+</script>
+</body>
+</html>
