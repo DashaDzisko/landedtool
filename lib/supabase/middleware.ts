@@ -35,11 +35,12 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/terms") ||
-    pathname.startsWith("/privacy");
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/promo");
 
   if (!user && !isAuthRoute && pathname !== "/design") {
     const url = request.nextUrl.clone();
-    url.pathname = "/sign-in";
+    url.pathname = pathname === "/" ? "/promo" : "/sign-in";
     return NextResponse.redirect(url);
   }
 

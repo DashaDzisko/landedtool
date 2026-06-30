@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Карьерный рычаг: собранный продукт как магнит для собесов</title>
+<style>
+  :root {
+    --bg: #0f0f10;
+    --surface: #1a1a1d;
+    --surface-2: #232327;
+    --border: #2e2e34;
+    --text: #f4f4f5;
+    --muted: #9ca0a8;
+    --accent: #ffb47e;
+    --accent-soft: #ffb47e22;
+    --accent-dark: #2a1808;
+    --object: #ffb47e;
+    --attr: #c5b4ff;
+    --cta: #5ee2a0;
+    --content: #ffd479;
+    --code-bg: #18181b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  .app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+  .brand { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .brand h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .brand p { font-size: 12px; color: var(--muted); margin: 0; }
+  .lesson-list { list-style: none; padding: 0; margin: 0; }
+  .lesson-item {
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s ease;
+  }
+  .lesson-item:hover { color: var(--text); background: var(--surface-2); }
+  .lesson-item.active {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+  }
+  .lesson-num {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    width: 20px;
+  }
+  .lesson-item.active .lesson-num { color: var(--accent); }
+
+  .main { display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+  .topbar {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .topbar h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+  .topbar .progress { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .content {
+    overflow-y: auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .lesson-text h3 { font-size: 22px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .lesson-text .subtitle { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .lesson-text p { font-size: 14px; }
+  .lesson-text ul, .lesson-text ol { font-size: 14px; padding-left: 20px; }
+  .lesson-text li { margin-bottom: 6px; }
+  .designer-note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .designer-note strong { color: var(--accent); }
+  code.inline {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+  .quote-block {
+    border-left: 3px solid var(--border);
+    padding: 8px 14px;
+    margin: 12px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .workspace { position: sticky; top: 0; display: flex; flex-direction: column; gap: 12px; }
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-label button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .panel-label button:hover { color: var(--text); border-color: var(--muted); }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 380px;
+  }
+
+  textarea.sheet, input.sheet {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    resize: vertical;
+  }
+  textarea.sheet { min-height: 70px; line-height: 1.5; }
+  textarea.sheet:focus, input.sheet:focus { border-color: var(--accent); }
+  .sheet-block { margin-bottom: 14px; }
+  .sheet-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .sheet-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .saved-indicator {
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .saved-indicator.show { opacity: 1; }
+
+  .preview-box {
+    background: var(--accent-soft);
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 60px;
+    color: var(--text);
+  }
+  .preview-box .placeholder { color: var(--muted); font-style: italic; }
+  .preview-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .choice-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: var(--surface-2);
+  }
+  .choice-card:hover { border-color: var(--muted); }
+  .choice-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .choice-card h5 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .choice-card p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .choice-card.selected p { color: var(--text); }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+  }
+  .check-item label { flex: 1; cursor: pointer; }
+  .check-item .hint { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .compare-cell {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+  }
+  .compare-cell.bad {
+    background: #2a1818;
+    color: #ff9d8a;
+    border: 1px solid #4a2828;
+  }
+  .compare-cell.good {
+    background: #182a1f;
+    color: #5ee2a0;
+    border: 1px solid #2a4a38;
+  }
+
+  .bottombar {
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .btn {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+    font-weight: 700;
+  }
+  .btn.primary:hover:not(:disabled) { background: #ffc99a; border-color: #ffc99a; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Карьерный рычаг</h1>
+      <p>Как превратить собранный продукт в магнит для собесов.</p>
+    </div>
+    <ul class="lesson-list" id="lessonList"></ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h2 id="topTitle">-</h2>
+      <span class="progress" id="progress">0 / 0</span>
+    </header>
+
+    <section class="content">
+      <div class="lesson-text" id="lessonText"></div>
+      <div class="workspace" id="workspace"></div>
+    </section>
+
+    <footer class="bottombar">
+      <button class="btn" id="prevBtn">← Назад</button>
+      <button class="btn primary" id="nextBtn">Далее →</button>
+    </footer>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = "career_leverage_workbook_v1";
+const work = (() => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+})();
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(work)); } catch {}
+  document.querySelectorAll(".saved-indicator").forEach(el => {
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 800);
+  });
+}
+function bindInput(el, key) {
+  el.value = work[key] || "";
+  el.addEventListener("input", () => { work[key] = el.value; save(); });
+}
+function escape(s) {
+  return (s || "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+const lessons = [
+  // 1. WHY PACKAGE AT ALL
+  {
+    title: "Зачем упаковывать",
+    subtitle: "Сборка - только часть работы.",
+    body: () => `
+      <p>Вы только что закончили сборку продукта. Кажется, что дальше можно выдохнуть: код работает, фичи на месте. Тут обычно и теряется самая полезная часть работы.</p>
+      <p>Готовый продукт сам по себе мало что меняет в карьере. Поменять может то, что он способен открыть: помочь попасть на собес, привести клиента, начать разговор, который без него не случился бы.</p>
+      <p>Чтобы это сработало, продукт надо <strong>упаковать</strong>: сделать так, чтобы кто-то посторонний за пару минут понял, что вы сделали, зачем и почему это интересно. Без этого даже хороший проект остается невидимым.</p>
+      <div class="designer-note">
+        Многие пет-проекты остаются незамеченными не из-за качества. Просто про них никто не узнает. Готовый код и живая ссылка, которую никто не открыл, по результату дают примерно одинаковое.
+      </div>
+      <p>Поэтому модуль не про новые фичи. Он про то, как уже сделанное становится видимым: в резюме, в кейсе на портфолио, в LinkedIn, в переписке с рекрутером, на собесе.</p>
+      <p>Сразу оговоримся: Landed вряд ли превратится в бизнес. Трекеры подач - переполненная ниша (Teal, Huntr, Simplify), люди за такое почти не платят. Но навык упаковки переносится почти куда угодно: на следующий пет-проект, на рабочий кейс, на тестовое задание.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label">Что внутри модуля</div>
+      <div class="panel">
+        <h3 style="margin:0 0 12px;font-size:18px;">Карьерный рычаг</h3>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 16px;">Модуль занятия для курса Vibe Coding for Web Designers. Разбираем на примере <strong style="color:var(--text);">Landed - AI Job Application Tracker</strong>, но подход подходит для любого собранного продукта.</p>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div class="panel-label" style="margin-bottom:8px;">Три блока</div>
+          <ul style="font-size:13px;margin:0;padding-left:20px;color:var(--muted);">
+            <li><strong style="color:var(--text);">Упаковать</strong> - Landed как портфольный кейс</li>
+            <li><strong style="color:var(--text);">Рассказать</strong> - история на собесе</li>
+            <li><strong style="color:var(--text);">Учесть</strong> - типичные ошибки</li>
+          </ul>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px;font-size:12px;color:var(--muted);">
+          <strong>К концу модуля у вас будет:</strong> наброски origin story, одна строка для резюме, скелет кейса, текст 60-секундного питча и план на ближайшую неделю.
+        </div>
+      </div>
+    `,
+  },
+
+  // 2. WHAT HIRING MANAGERS EVALUATE
+  {
+    title: "Что оценивает hiring manager",
+    subtitle: "На что обычно смотрят в пет-проекте.",
+    body: () => `
+      <p>Когда hiring manager открывает ваш пет-проект, его обычно интересуют не код и не визуал. Скорее всего, он считывает три вещи:</p>
+      <ol>
+        <li><strong>Почему вы это сделали.</strong> Если ответ звучит как «я сам(а) сталкивался(ась) с этой проблемой, и существующие решения мне не подошли», это сразу заметно. Видно драйв и то, что технические решения принимались осознанно: у автора было что-то на кону. У таких проектов обычно и документация толковее, потому что автору было важно.</li>
+        <li><strong>Где оно живет.</strong> Между «у меня все работает локально» и «вот ссылка, заходите» большая разница. Даже один сторонний пользователь меняет восприятие: значит, продукт дотянули до состояния, в котором его не страшно показать.</li>
+        <li><strong>Что именно вы решали.</strong> Вместо «вот скрины приложения» интереснее связка: была вот такая проблема, попробовал(а) такое решение, вот что из этого получилось.</li>
+      </ol>
+      <div class="designer-note">
+        Попробуйте прямо сейчас ответить на три вопроса справа. Если на какой-то из них ответа пока нет, имеет смысл сначала закрыть эту дыру, а потом думать про новые фичи.
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Проверьте свой проект</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">1. Почему вы это сделали (2 предложения, личная история)</label>
+          <textarea class="sheet" id="origin_story" rows="3" placeholder="Я постоянно подавалась на вакансии и теряла нить: кто ответил, где отказ. Готовые трекеры заставляли все вбивать руками."></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">2. Живой URL продукта</label>
+          <input class="sheet" id="live_url" placeholder="https://...">
+          <div class="sheet-hint">Если ссылки пока нет, стоит начать именно с этого.</div>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">3. Что вы решали (одна фраза: проблема → решение → результат)</label>
+          <textarea class="sheet" id="what_solved" rows="3" placeholder="Подключила почту, чтобы трекер сам логировал отказы и приглашения."></textarea>
+        </div>
+      </div>
+    `,
+    init: () => {
+      bindInput(document.getElementById("origin_story"), "origin_story");
+      bindInput(document.getElementById("live_url"), "live_url");
+      bindInput(document.getElementById("what_solved"), "what_solved");
+    },
+  },
+
+  // 3. CASE SKELETON
+  {
+    title: "Скелет кейса",
+    subtitle: "Из каких блоков обычно собирают кейс.",
+    body: () => `
+      <p>Хорошо работает такая структура:</p>
+      <ol>
+        <li><strong>Хук</strong> (1 экран) - одна строка про то, что это и зачем. Лучше описание, чем просто название.</li>
+        <li><strong>Проблема</strong> - личная история. Почему существующие решения не подошли.</li>
+        <li><strong>Роль и рамки</strong> - что вы делали сами, за какое время, какой стек.</li>
+        <li><strong>Ключевые решения</strong> - 2-3 развилки, где приходилось выбирать, и логика выбора.</li>
+        <li><strong>Что показать вживую</strong> - кликабельный продукт или короткое видео-прохождение.</li>
+        <li><strong>Что не сделали</strong> - что осознанно выкинули и что хотелось бы доделать.</li>
+        <li><strong>Вывод</strong> - что вы узнали, что поменялось, какая-нибудь метрика, если есть.</li>
+      </ol>
+      <div class="designer-note">
+        Про хук стоит остановиться отдельно: описание обычно работает заметно лучше, чем одно название. Для примера:
+        <div class="compare-row">
+          <div class="compare-cell bad">«Landed» / «Job Tracker»</div>
+          <div class="compare-cell good">«AI-трекер подач, который сам читает почту и логирует отказы и приглашения. Собран за 8 недель на Next.js + OpenAI»</div>
+        </div>
+        Вторая версия читается за несколько секунд и людьми, и AI-скринерами, через которые сейчас проходит большая часть портфолио до того, как до них доберется живой рекрутер.
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Заполните скелет</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Хук (одна строка)</label>
+          <input class="sheet" id="case_hook" placeholder="AI-трекер подач, который сам читает почту...">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Проблема (личная боль)</label>
+          <textarea class="sheet" id="case_problem" rows="2"></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Роль, время, стек</label>
+          <input class="sheet" id="case_role" placeholder="дизайнер, 8 недель, Next.js + OpenAI + Supabase">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">2-3 ключевых решения и почему</label>
+          <textarea class="sheet" id="case_decisions" rows="3" placeholder="– AI для парсинга описаний (Structured Outputs)&#10;– Статусы держу детерминированно&#10;– Без авторизации в MVP"></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Что НЕ сделал(а) и почему (это сила)</label>
+          <textarea class="sheet" id="case_cut" rows="2"></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Вывод / метрика</label>
+          <textarea class="sheet" id="case_result" rows="2"></textarea>
+        </div>
+      </div>
+    `,
+    init: () => {
+      ["case_hook","case_problem","case_role","case_decisions","case_cut","case_result"].forEach(k => {
+        bindInput(document.getElementById(k), k);
+      });
+    },
+  },
+
+  // 4. AI CONFIDENCE
+  {
+    title: "Уверенная работа с AI",
+    subtitle: "Где показать опыт работы с моделями.",
+    body: () => `
+      <p>Фраза «я использовал(а) ChatGPT» сама по себе мало что говорит. Лучше работают конкретные решения:</p>
+      <ul>
+        <li>Где вы оставили детерминированный код, а где доверились модели (например, Structured Outputs против хардкода).</li>
+        <li>Где вы намеренно не использовали AI и почему. Это часто рассказывает о подходе больше, чем сами use-кейсы.</li>
+        <li>Как vibe coding позволил вам как дизайнеру самостоятельно собрать фронтенд. Такая комбинация навыков сейчас особенно ценится в командах.</li>
+      </ul>
+      <div class="designer-note">
+        Удобная формула одной строки для резюме или LinkedIn:<br>
+        <code class="inline">Глагол + задеплоено + что делает + цифра</code><br>
+        Цифра может быть скромной (например, «12 человек»), главное - чтобы она была настоящей.
+      </div>
+      <p>Соберите свою строку справа. Она обновляется по мере того, как вы пишете.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Сборка одной строки</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Глагол (Built / Shipped / Launched / Designed and built)</label>
+          <input class="sheet" id="aif_verb" placeholder="Built and deployed">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Имя продукта + что это (одна фраза)</label>
+          <input class="sheet" id="aif_name" placeholder="Landed - AI job-application tracker">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Стек (3-4 ключевых)</label>
+          <input class="sheet" id="aif_stack" placeholder="Next.js, OpenAI, Vercel">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Что делает (одна фраза с глаголом)</label>
+          <input class="sheet" id="aif_does" placeholder="Reads inbox via MCP, auto-logs applications">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Цифра (реальная, даже скромная)</label>
+          <input class="sheet" id="aif_metric" placeholder="Used by 12 people in first month">
+        </div>
+        <div class="preview-label">Превью строки</div>
+        <div class="preview-box" id="aif_preview"><span class="placeholder">Заполните поля выше...</span></div>
+      </div>
+    `,
+    init: () => {
+      const fields = ["aif_verb","aif_name","aif_stack","aif_does","aif_metric"];
+      fields.forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("aif_preview");
+      const update = () => {
+        const v = work.aif_verb, n = work.aif_name, s = work.aif_stack, d = work.aif_does, m = work.aif_metric;
+        if (!v && !n && !s && !d && !m) {
+          preview.innerHTML = '<span class="placeholder">Заполните поля выше...</span>';
+          return;
+        }
+        const parts = [];
+        if (v) parts.push(escape(v));
+        if (n) parts.push(escape(n));
+        let line = parts.join(" ");
+        if (s) line += ` (${escape(s)}).`;
+        else if (line) line += ".";
+        if (d) line += " " + escape(d) + ".";
+        if (m) line += " " + escape(m) + ".";
+        preview.innerHTML = line;
+      };
+      fields.forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+    },
+  },
+
+  // 5. README + PROJECT PAGE
+  {
+    title: "README и страница проекта",
+    subtitle: "Как обернуть проект для тех, кто его откроет.",
+    body: () => `
+      <p>Оформление репозитория и страницы проекта рассказывает о вас почти столько же, сколько сам продукт. Обычно hiring manager открывает сначала их и только потом идет по живой ссылке.</p>
+      <p>В качестве разумного минимума:</p>
+      <ul>
+        <li><strong>README на гитхабе:</strong> одна-две строки мотивации (origin story), стек, живая ссылка, пара скринов, инструкция, как запустить. Репозиторий стоит закрепить (pin) у себя в профиле.</li>
+        <li><strong>Кейс на портфолио:</strong> по скелету из урока 3. Лучше встроить кликабельный прототип или видео, чем выкладывать 20 страниц «процесса».</li>
+        <li><strong>Короткий пост</strong> о том, как вы это собирали. Заметно меняет восприятие проекта и помогает тому, чтобы про него узнавали еще до вашей заявки.</li>
+      </ul>
+      <div class="designer-note">
+        Полезный ориентир: можно ли скинуть ссылку двум разным людям, и оба без вашего пояснения поймут, что они открыли.
+      </div>
+    `,
+    workspace: () => {
+      work.readme_checks = work.readme_checks || {};
+      const items = [
+        ["Одна-две строки мотивации в самом верху README", "Origin story с урока 2 хорошо ложится сюда."],
+        ["Стек указан явно", "Чтобы технологии было видно без клика."],
+        ["Живая ссылка в README и в About репозитория", "Лучше держать на видном месте, а не зарывать в текст."],
+        ["1-2 скрина или GIF продукта", "Скорее сам интерфейс в работе, чем схема архитектуры."],
+        ["Раздел «Как запустить», даже из трех строк", "Показывает, что репозиторий живой и поддерживаемый."],
+        ["Репозиторий закреплен (pinned) на профиле GitHub", "Так рекрутер скорее наткнется на него первым."],
+        ["Кейс на портфолио со встроенным прототипом или видео", "Чтобы можно было сразу что-то покликать."],
+        ["Один короткий пост о сборке (LinkedIn / X / Medium)", "Чтобы про проект узнавали без вашей заявки."],
+      ];
+      return `
+        <div class="panel-label"><span>Чек-лист упаковки</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="rd${i}" ${work.readme_checks[i] ? "checked" : ""}>
+              <label for="rd${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.readme_checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+
+  // 6. STORYTELLING STRUCTURE
+  {
+    title: "Структура устного рассказа",
+    subtitle: "Как держать рассказ собранным.",
+    body: () => `
+      <p>Лучше рассказывать историю - с началом, серединой и концом. Список шагов «делал то, потом то, потом то» обычно звучит скучно, и проект становится трудноотличимым от десятков других.</p>
+      <p>Есть две рабочие структуры. Выберите ту, что ближе.</p>
+      <div class="designer-note">
+        Привычный STAR (Situation - Task - Action - Result) делает большой акцент на результате, но мало внимания уделяет тому, как именно вы принимали решения. На собесе чаще слушают ход мысли и компромиссы, поэтому второй вариант часто удобнее.
+      </div>
+      <p>Текст имеет смысл репетировать структурно, а не наизусть. Заученный питч на собесе обычно слышно: он звучит как выученная роль, а не разговор.</p>
+    `,
+    workspace: () => {
+      const choices = [
+        {
+          key: "story",
+          title: "История",
+          desc: "Проблема → подход → сложности и развилки → результат → что бы вы сделали дальше. Удобно для общих собесов и портфолио-ревью."
+        },
+        {
+          key: "engineer",
+          title: "Контекст → Ограничения → Решения → Результаты → Выводы",
+          desc: "Более точная альтернатива STAR. Хорошо ложится, когда на собесе подробно разбирают инженерные или продуктовые решения и компромиссы."
+        }
+      ];
+      const selected = work.story_structure || "";
+      return `
+        <div class="panel-label"><span>Выберите структуру</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${choices.map(c => `
+            <div class="choice-card ${selected === c.key ? "selected" : ""}" data-key="${c.key}">
+              <h5>${c.title}</h5>
+              <p>${c.desc}</p>
+            </div>
+          `).join("")}
+          <div class="sheet-block" style="margin-top:16px;">
+            <label class="sheet-label">Заметки к рассказу (где у тебя слабое место в структуре?)</label>
+            <textarea class="sheet" id="story_notes" rows="4" placeholder="Например: легко описываю проблему, но теряюсь на компромиссах."></textarea>
+          </div>
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".choice-card").forEach(card => {
+        card.onclick = () => {
+          work.story_structure = card.dataset.key;
+          document.querySelectorAll(".choice-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          save();
+        };
+      });
+      bindInput(document.getElementById("story_notes"), "story_notes");
+    },
+  },
+
+  // 7. 60-SECOND PITCH
+  {
+    title: "60-секундный питч",
+    subtitle: "Что обычно туда полезно положить.",
+    body: () => `
+      <p>За минуту удобно успеть пять вещей:</p>
+      <ol>
+        <li><strong>Личную причину</strong>, почему вообще взялись.</li>
+        <li><strong>Решение в одну фразу.</strong></li>
+        <li><strong>Ключевое решение</strong> и компромисс, который с ним пришел.</li>
+        <li><strong>Опыт работы с AI</strong> и владение фронтом (что у вас открылось благодаря проекту).</li>
+        <li><strong>Что доделали бы или сознательно выкинули.</strong></li>
+      </ol>
+      <p>Соберите свою версию справа. Превью обновляется по мере того, как вы заполняете поля.</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Сборка питча</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">1. Личная причина (1-2 фразы)</label>
+          <textarea class="sheet" id="p_pain" rows="2"></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">2. Решение в одну фразу</label>
+          <input class="sheet" id="p_solution" placeholder="Поэтому я собрала свой: ...">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">3. Ключевое решение и компромисс</label>
+          <textarea class="sheet" id="p_decision" rows="2" placeholder="Самым интересным решением было..."></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">4. Срок, роль, что у вас открылось благодаря проекту (AI, фронт)</label>
+          <textarea class="sheet" id="p_growth" rows="2" placeholder="Собрала за 8 недель, как дизайнер без бэкенд-бэкграунда..."></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">5. Что бы доделали или сознательно выкинули и почему</label>
+          <textarea class="sheet" id="p_future" rows="2"></textarea>
+        </div>
+        <div class="preview-label">Превью питча</div>
+        <div class="preview-box" id="p_preview"><span class="placeholder">Заполните поля...</span></div>
+      </div>
+    `,
+    init: () => {
+      const fields = ["p_pain","p_solution","p_decision","p_growth","p_future"];
+      fields.forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("p_preview");
+      const update = () => {
+        const parts = fields.map(k => work[k]).filter(Boolean);
+        if (!parts.length) {
+          preview.innerHTML = '<span class="placeholder">Заполните поля...</span>';
+          return;
+        }
+        preview.innerHTML = parts.map(escape).join(" ");
+      };
+      fields.forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+    },
+  },
+
+  // 8. COMPANY PAIN
+  {
+    title: "Привязка к задачам компании",
+    subtitle: "Как связать продукт с тем, что важно команде.",
+    body: () => `
+      <p>Перед собесом полезно читать не только список «requirements», а в первую очередь блоки «что вы будете делать» и «как выглядит успех в роли». Там обычно видна реальная задача команды. Дальше свой проект уже можно привязать к ней.</p>
+      <div class="quote-block">
+        «Вижу, вы строите AI-фичи и вам важно, чтобы дизайнеры могли прототипировать в коде. В Landed я как раз этим и занималась: собирала AI-продукт от дизайна до деплоя сама».
+      </div>
+      <p>Так ваша история сразу попадает в контекст команды, и разговор начинается с того, что им важно прямо сейчас.</p>
+      <div class="designer-note">
+        Полезные разделы вакансии: «what you'll do», «about the team», «what success looks like». Раздел «requirements» обычно пишет HR, и для подготовки к разговору он почти ничего не дает.
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Мостик к одной компании</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Компания и роль</label>
+          <input class="sheet" id="bridge_company" placeholder="Например: Linear, Senior Product Designer">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Задача команды (из «what you'll do», своими словами)</label>
+          <textarea class="sheet" id="bridge_pain" rows="3" placeholder="Они строят AI-фичи и хотят, чтобы дизайнеры могли прототипировать в коде."></textarea>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Ваш мостик: «Вижу, вы ___. В [продукте] я как раз этим и занималась: ___»</label>
+          <textarea class="sheet" id="bridge_link" rows="3" placeholder="Вижу, вы..."></textarea>
+        </div>
+        <div class="preview-label">Готовая фраза</div>
+        <div class="preview-box" id="bridge_preview"><span class="placeholder">Заполните поля...</span></div>
+      </div>
+    `,
+    init: () => {
+      ["bridge_company","bridge_pain","bridge_link"].forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("bridge_preview");
+      const update = () => {
+        const c = work.bridge_company, p = work.bridge_pain, l = work.bridge_link;
+        if (!c && !p && !l) {
+          preview.innerHTML = '<span class="placeholder">Заполните поля...</span>';
+          return;
+        }
+        let html = "";
+        if (c) html += `<div style="font-weight:600;margin-bottom:6px;">${escape(c)}</div>`;
+        if (l) html += escape(l);
+        else if (p) html += `<span class="placeholder">Боль: ${escape(p)}. Допишите мостик.</span>`;
+        preview.innerHTML = html;
+      };
+      ["bridge_company","bridge_pain","bridge_link"].forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+    },
+  },
+
+  // 9. SHOW DON'T TELL
+  {
+    title: "Показать, а не описывать",
+    subtitle: "Когда есть продукт, лучше его открыть.",
+    body: () => `
+      <p>Частая ошибка на собесе - подробно описывать взаимодействия, которые так и не показал(а). Раз продукт живой, проще открыть его и пройти по нему вместе с собеседником.</p>
+      <p>По убыванию того, как это обычно воспринимается:</p>
+      <ol>
+        <li>Короткий live-walkthrough в самом продукте.</li>
+        <li>Записанное видео-прохождение (45-90 секунд).</li>
+        <li>Мини-дек на 5-10 слайдов.</li>
+        <li>Только устный рассказ или статичные скриншоты.</li>
+      </ol>
+      <div class="designer-note">
+        Часто простая запись экрана работает сильнее, чем красиво сверстанный PDF-кейс. Живой интерфейс лучше доказывает, что продукт действительно собран и работает.
+      </div>
+    `,
+    workspace: () => {
+      work.show_checks = work.show_checks || {};
+      const items = [
+        ["Продукт открывается в один клик с того места, где идет разговор", "Закладка или закрепленная вкладка, чтобы не искать прямо во время созвона."],
+        ["Подготовлен сценарий live-walkthrough на 60-90 секунд", "Понятно, что и в каком порядке показывать."],
+        ["Есть запасное видео на случай, если упадет интернет", "Сценарий примерно такой же, как у live-walkthrough."],
+        ["Можно открыть код, коммиты, репозиторий, если попросят", "Закрепленное репо и приличная история коммитов."],
+        ["Есть 1-2 слайда с архитектурой на случай вопроса «как это устроено»", "По умолчанию не показываются, но лежат под рукой."],
+        ["Черновые экраны и debug-страницы убраны или спрятаны", "Чтобы случайно не открыть что-то незавершенное."],
+      ];
+      return `
+        <div class="panel-label"><span>Готовность к подаче</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="sh${i}" ${work.show_checks[i] ? "checked" : ""}>
+              <label for="sh${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.show_checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+
+  // 10. PITFALLS
+  {
+    title: "Типичные ошибки",
+    subtitle: "Что чаще всего топит пет-проект на собесе.",
+    body: () => `
+      <p>Из того, что встречается чаще всего:</p>
+      <ul>
+        <li><strong>Сводить рассказ к стеку.</strong> Перечисление «Next.js, Tailwind, OpenAI...» почти ничего не дает собеседнику. Гораздо интереснее, почему именно так и от чего пришлось отказаться.</li>
+        <li><strong>Показывать продукт как «чистое» решение.</strong> Если в рассказе нет ни одного «здесь пришлось пожертвовать чем-то ради другого», это часто читается как отсутствие реального опыта.</li>
+        <li><strong>Пересказывать процесс целиком.</strong> Подробный отчет здесь обычно не нужен. Многое можно сокращать в пользу более интересного рассказа.</li>
+        <li><strong>Учить наизусть.</strong> Слишком отрепетированный питч обычно слышно. Удобнее держать в голове структуру и подбирать слова по ходу.</li>
+        <li><strong>Скриншоты вместо живого продукта.</strong> Если ссылка под рукой, лучше открыть ее, чем разглядывать картинки.</li>
+        <li><strong>Незадеплоенный проект.</strong> Фраза «у меня все работает локально» производит совсем другое впечатление, чем рабочая ссылка.</li>
+      </ul>
+      <div class="designer-note">
+        Несколько честных оговорок, которые обычно играют в плюс:
+        <ul style="margin-top:6px;">
+          <li>Рассказать, что выкинули из MVP и почему. Чаще воспринимается как зрелость, чем как недоделанность.</li>
+          <li>Рассказать, что сделали бы иначе. На собесах часто интересуются именно такими «lessons learned».</li>
+          <li>Не приписывать себе работу AI или шаблона. Лучше показать, где была ваша оценка и решение, а где взято со стороны.</li>
+        </ul>
+      </div>
+    `,
+    workspace: () => {
+      work.pitfall_checks = work.pitfall_checks || {};
+      const items = [
+        ["В моем питче есть хотя бы один компромисс («выбрал X, потому что Y, а Z делать не стал»)", "Объяснение выбора почти всегда работает лучше простого перечисления."],
+        ["Я честно проговариваю, что выкинул(а) и почему", "Обычно воспринимается лучше, чем кажется."],
+        ["У меня готова фраза «сделал(а) бы иначе ___»", "Этот вопрос на собесе возникает почти всегда."],
+        ["Я понимаю, где была работа AI, а где моя оценка, и могу это разделить в рассказе", "Так понятнее, какая часть продукта - ваша."],
+        ["Я держу в голове структуру, а не заученный текст", "Слова в разных рассказах будут немного отличаться, и это нормально."],
+        ["В рассказе нет ни одного «я использовал [технологию]» без объяснения причины", "Стек без объяснения выбора почти ничего не передает."],
+      ];
+      return `
+        <div class="panel-label"><span>Самопроверка</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="pf${i}" ${work.pitfall_checks[i] ? "checked" : ""}>
+              <label for="pf${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.pitfall_checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+
+  // 11. BE FOUND
+  {
+    title: "Чтобы про вас узнавали",
+    subtitle: "Дистрибуция продукта без рассылки резюме.",
+    body: () => `
+      <p>Хорошее портфолио по-прежнему нужно, но само по себе оно редко закрывает поиск работы. Быстрее всего нанимают тех, про кого уже что-то слышали к моменту подачи заявки.</p>
+      <p>Для пет-проекта это обычно складывается из нескольких вещей:</p>
+      <ul>
+        <li><strong>Build in public</strong> - короткие посты во время сборки. Даже на небольшой аудитории это работает, потому что про вас начинают узнавать.</li>
+        <li><strong>Запуск в нишевых сообществах</strong>: Show HN, Product Hunt, тематические сабреддиты, например про job search.</li>
+        <li><strong>Узкое позиционирование.</strong> «Я продуктовый дизайнер» - конкуренция со всеми. «Дизайнер, который собирает AI-инструменты в коде» - заметно более узкое поле и меньше конкурентов.</li>
+      </ul>
+      <div class="designer-note">
+        Разумный минимум - один пост в LinkedIn, X или Medium и один в подходящем сообществе. Этого часто достаточно, чтобы продукт начали замечать.
+      </div>
+    `,
+    workspace: () => {
+      work.dist_checks = work.dist_checks || {};
+      const items = [
+        ["Один пост о сборке в LinkedIn, X или Medium", "Лучше про процесс, чем про сам релиз: что было неочевидно."],
+        ["Пост в нишевом сообществе (Reddit, Indie Hackers, профильный канал)", "Там, где живет ваша целевая аудитория."],
+        ["Show HN или Product Hunt, если продукт это потянет", "Имеет смысл, когда есть рабочая ссылка и понятное одно преимущество."],
+        ["Более узкое позиционирование в портфолио и в LinkedIn", "Например, «дизайнер, который собирает AI-инструменты в коде»."],
+        ["Сайт-портфолио находится в Google по нишевому запросу", "Полезно проверить: ищете свою нишу - находите себя?"],
+        ["DM открыты, в bio видна позиция и ссылка на продукт", "Чтобы человеку, увидевшему пост, было куда написать."],
+      ];
+      return `
+        <div class="panel-label"><span>Каналы дистрибуции</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="ds${i}" ${work.dist_checks[i] ? "checked" : ""}>
+              <label for="ds${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.dist_checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+
+  // 12. HOMEWORK
+  {
+    title: "Что сделать на неделе",
+    subtitle: "По одному пункту за раз.",
+    body: () => `
+      <p>Чтобы не утонуть, на ближайшую неделю достаточно по одному пункту из каждого блока:</p>
+      <ol>
+        <li>Написать origin story Landed в двух предложениях (личная история, без маркетинга).</li>
+        <li>Собрать одну строку для резюме или LinkedIn по формуле из урока 4.</li>
+        <li>Задеплоить, проверить живую ссылку и привести в порядок README (мотивация, стек, скрин, ссылка).</li>
+        <li>Записать 60-секундный питч на телефон, пересмотреть, проверить тайминг.</li>
+        <li>Выбрать одну компанию, к которой хочется попасть, и написать, к какой ее задаче можно привязать Landed.</li>
+      </ol>
+      <div class="designer-note">
+        Удобный фокус недели: не «сколько фич я добавил(а)», а «могу ли я за минуту рассказать про Landed так, чтобы собеседнику стало интересно».
+      </div>
+      <p style="margin-top:20px;font-size:13px;color:var(--muted);">
+        <em>Общая мысль модуля: сборка - это только часть работы. Если про продукт никто не услышит и не сможет про него рассказать, он остается концептом, даже когда уже готов.</em>
+      </p>
+    `,
+    workspace: () => {
+      work.hw_checks = work.hw_checks || {};
+      const items = [
+        ["Origin story в двух предложениях написана", "Личная история, без маркетинга."],
+        ["Одна строка для резюме или LinkedIn собрана", "По формуле: глагол + задеплоено + что делает + цифра."],
+        ["Живая ссылка работает, README обновлен", "Полезно открыть в инкогнито и пройти как новый пользователь."],
+        ["60-секундный питч записан на телефон и просмотрен", "Послушать запись - важная часть упражнения."],
+        ["Выбрана одна компания, мостик к ее задаче написан", "Не просто отправить резюме, а понимать, как откроется разговор."],
+      ];
+      return `
+        <div class="panel-label"><span>Чек-лист недели</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          ${items.map((it, i) => `
+            <div class="check-item">
+              <input type="checkbox" id="hw${i}" ${work.hw_checks[i] ? "checked" : ""}>
+              <label for="hw${i}">${it[0]}<span class="hint">${it[1]}</span></label>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    },
+    init: () => {
+      document.querySelectorAll(".check-item input").forEach((cb, i) => {
+        cb.onchange = () => { work.hw_checks[i] = cb.checked; save(); };
+      });
+    },
+  },
+
+  // 13. AARRR FUNNEL + VANITY/ACTIONABLE
+  {
+    title: "Воронка AARRR",
+    subtitle: "Пиратская воронка и какие числа стоит называть.",
+    body: () => `
+      <p>AARRR - пиратская воронка из пяти шагов, ее придумал Дэйв Макклюр для стартапов. Для пет-проекта она удобна как чек-лист: пройдитесь по шагам и посмотрите, что у вас есть хотя бы по двум-трем.</p>
+      <ol>
+        <li><strong>Acquisition</strong> - откуда пришли. «Выложила в три дизайн-чата, 40 человек перешли по ссылке» - уже число.</li>
+        <li><strong>Activation</strong> - первое осмысленное действие. «Из 40 перешедших 15 добавили хотя бы одну вакансию». Конверсия 37%.</li>
+        <li><strong>Retention</strong> - вернулись ли. «Из 15 восемь зашли на второй неделе без напоминания». 53%, для пет-проекта довольно много.</li>
+        <li><strong>Referral</strong> - рассказали ли другим. «Три человека скинули ссылку знакомым без моей просьбы».</li>
+        <li><strong>Revenue</strong> - деньги. Для учебного проекта честное «не монетизировала» - тоже нормальный ответ.</li>
+      </ol>
+      <div class="designer-note">
+        Дополнение про сами числа (из книги «Lean Startup» Эрика Риса). Не все они одинаково полезны:
+        <ul style="margin-top:6px;">
+          <li><strong>Пустышки (vanity):</strong> красиво звучат, мало что говорят. «1000 посещений сайта», «200 звезд на гитхабе», «50 регистраций».</li>
+          <li><strong>Метрики-действия (actionable):</strong> по ним можно сделать следующий шаг. «Из 50 зарегистрировавшихся 18 добавили вакансию, конверсия активации 36%».</li>
+        </ul>
+        От пустышки сложно оттолкнуться и решить, что делать дальше. От actionable - можно.
+      </div>
+      <p>На собесе обычно достаточно двух-трех шагов воронки с числами. И каждое число лучше подавать с выводом: «у нас X, значит Y, поэтому делаю Z».</p>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Ваша воронка</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Acquisition - откуда пришли</label>
+          <input class="sheet" id="aarrr_acq" placeholder="40 переходов из трех дизайн-чатов">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Activation - первое осмысленное действие</label>
+          <input class="sheet" id="aarrr_act" placeholder="15 из 40 добавили хотя бы одну вакансию (37%)">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Retention - вернулись ли</label>
+          <input class="sheet" id="aarrr_ret" placeholder="8 из 15 зашли на второй неделе (53%)">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Referral - рассказали другим</label>
+          <input class="sheet" id="aarrr_ref" placeholder="3 человека скинули ссылку без моей просьбы">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Revenue - деньги (можно «не монетизирую»)</label>
+          <input class="sheet" id="aarrr_rev" placeholder="Не монетизирую, учебный проект">
+        </div>
+        <div class="check-item" style="border-bottom:none;padding:14px 0 0;">
+          <input type="checkbox" id="aarrr_chk">
+          <label for="aarrr_chk">К каждому числу у меня есть вывод <span class="hint">«у нас X, значит Y, поэтому делаю Z».</span></label>
+        </div>
+      </div>
+    `,
+    init: () => {
+      ["aarrr_acq","aarrr_act","aarrr_ret","aarrr_ref","aarrr_rev"].forEach(k => bindInput(document.getElementById(k), k));
+      const cb = document.getElementById("aarrr_chk");
+      cb.checked = !!work.aarrr_chk;
+      cb.onchange = () => { work.aarrr_chk = cb.checked; save(); };
+    },
+  },
+
+  // 14. UX METRICS - HEART + SUS
+  {
+    title: "UX-метрики: HEART и SUS",
+    subtitle: "Как говорить про пользовательский опыт числами.",
+    body: () => `
+      <p>HEART - пять категорий для оценки пользовательского опыта, придумали в Google в 2010-м (автор - Керри Родден). Появилась она, когда команда заметила: бизнес-метрики (выручка, просмотры) почти ничего не говорят про то, каково людям пользоваться продуктом.</p>
+      <ul>
+        <li><strong>Happiness</strong> - насколько пользователи довольны (собирается опросом). «Спросила 10 тестовых пользователей, насколько удобен процесс добавления вакансии. 7 из 10 поставили 4+ из 5».</li>
+        <li><strong>Engagement</strong> - насколько активно пользуются. «Среднее количество вакансий на пользователя - 8. Средняя сессия - 4 минуты».</li>
+        <li><strong>Adoption</strong> - новые пользователи или новая фича. «За первую неделю зарегистрировались 15 человек без платной рекламы».</li>
+        <li><strong>Retention</strong> - возвращаются ли. «53% вернулись на второй неделе».</li>
+        <li><strong>Task success</strong> - могут ли выполнить задачу, как быстро, сколько ошибок. «Среднее время добавления - 40 секунд. До Landed люди тратили около 3 минут вручную».</li>
+      </ul>
+      <p>Все пять категорий закрывать не нужно. Двух-трех, подходящих под продукт, обычно достаточно. Внутри каждой можно еще раскрыть цепочку <strong>Goals → Signals → Metrics</strong> (GSM): цель → какой сигнал скажет, что вы к ней идете → как этот сигнал измерить.</p>
+      <div class="designer-note">
+        Рядом с HEART стоит знать про SUS (System Usability Scale). Это 10 стандартных утверждений с оценками от 1 до 5, методу 40+ лет, он бесплатный и валидированный. Результат - число от 0 до 100. Ориентиры: 68 и выше - выше среднего, 80+ - отлично, ниже 50 - серьезные проблемы. Сильная сторона SUS в том, что это стандарт, и hiring manager его скорее всего знает - можно сравнить с другими продуктами.
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Подбор HEART-метрик</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Happiness (опрос)</label>
+          <input class="sheet" id="heart_h" placeholder="7 из 10 поставили 4+/5">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Engagement (активность)</label>
+          <input class="sheet" id="heart_e" placeholder="8 вакансий на пользователя, 4 мин сессия">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Adoption (новые пользователи)</label>
+          <input class="sheet" id="heart_a" placeholder="15 за первую неделю без рекламы">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Retention (возвращаются ли)</label>
+          <input class="sheet" id="heart_r" placeholder="53% вернулись на второй неделе">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Task success (скорость, ошибки)</label>
+          <input class="sheet" id="heart_t" placeholder="40 сек vs ~3 мин вручную">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">SUS-балл (если проводили), 0-100</label>
+          <input class="sheet" id="heart_sus" placeholder="74">
+        </div>
+      </div>
+    `,
+    init: () => {
+      ["heart_h","heart_e","heart_a","heart_r","heart_t","heart_sus"].forEach(k => bindInput(document.getElementById(k), k));
+    },
+  },
+
+  // 15. PMF TESTS
+  {
+    title: "Тесты на product-market fit",
+    subtitle: "Опросы, которые можно прогнать на 8-10 пользователях.",
+    body: () => `
+      <p>Когда хочется понять, нащупали ли вы хоть какой-то product-market fit, есть два простых опросника, которые можно прогнать даже на маленькой выборке.</p>
+      <p><strong>Тест Шона Эллиса (правило 40%).</strong> Один вопрос: «Что бы вы почувствовали, если бы больше не могли пользоваться продуктом?» Варианты ответа: очень расстроюсь / немного расстроюсь / не расстроюсь. Если 40% и больше ответили «очень расстроюсь», обычно говорят про PMF. Меньше - продукт пока не стал необходимым.</p>
+      <p>Шон Эллис (первый маркетолог Dropbox, автор термина growth hacking) вывел этот порог, сравнив сотни стартапов: те, кто набирал 40%+, дальше росли устойчиво. Важный нюанс: считаются только «очень расстроюсь», «немного» сюда не идет.</p>
+      <p>На собесе: «Я провела тест Эллиса на 10 пользователях, 5 сказали «очень расстроюсь». Выборка маленькая, но направление понятно - продукт закрывает реальную боль».</p>
+      <p><strong>NPS (Net Promoter Score).</strong> Один вопрос: «Насколько вероятно, что вы порекомендуете продукт другу или коллеге?» Шкала от 0 до 10.</p>
+      <ul>
+        <li>9-10 - промоутеры</li>
+        <li>7-8 - пассивные</li>
+        <li>0-6 - критики</li>
+      </ul>
+      <p>NPS = % промоутеров − % критиков. Диапазон от −100 до +100. Ориентиры: выше 0 - нормально, выше 30 - хорошо, выше 50 - отлично.</p>
+      <div class="designer-note">
+        Эти два теста удобно использовать вместе. NPS меряет намерение рекомендовать, тест Эллиса - субъективную зависимость от продукта. Человек может посоветовать продукт, но не расстроиться, если он исчезнет. Когда оба сигнала совпадают, картина устойчивее: «NPS по 10 пользователям - 40, тест Эллиса - 50%, обе метрики говорят, что продукт цепляет».
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Результаты опросов</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Тест Эллиса: всего ответов</label>
+          <input class="sheet" id="ellis_total" placeholder="10" type="number">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Из них «очень расстроюсь»</label>
+          <input class="sheet" id="ellis_strong" placeholder="5" type="number">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">NPS: % промоутеров (9-10)</label>
+          <input class="sheet" id="nps_p" placeholder="50" type="number">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">NPS: % критиков (0-6)</label>
+          <input class="sheet" id="nps_d" placeholder="10" type="number">
+        </div>
+        <div class="preview-label">Итоги</div>
+        <div class="preview-box" id="pmf_preview"><span class="placeholder">Заполните хотя бы один опрос...</span></div>
+      </div>
+    `,
+    init: () => {
+      ["ellis_total","ellis_strong","nps_p","nps_d"].forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("pmf_preview");
+      const update = () => {
+        const t = parseFloat(work.ellis_total), s = parseFloat(work.ellis_strong);
+        const p = parseFloat(work.nps_p), d = parseFloat(work.nps_d);
+        const lines = [];
+        if (t > 0 && !isNaN(s)) {
+          const pct = Math.round((s / t) * 100);
+          const verdict = pct >= 40 ? "выше порога Эллиса (40%)" : "ниже порога Эллиса (40%)";
+          lines.push(`<div>Тест Эллиса: <strong>${pct}%</strong> «очень расстроюсь» (${s} из ${t}). ${verdict}.</div>`);
+        }
+        if (!isNaN(p) && !isNaN(d)) {
+          const nps = Math.round(p - d);
+          let verdict = "ниже нормы";
+          if (nps > 50) verdict = "отлично";
+          else if (nps > 30) verdict = "хорошо";
+          else if (nps > 0) verdict = "нормально";
+          lines.push(`<div style="margin-top:6px;">NPS: <strong>${nps}</strong> (${verdict}).</div>`);
+        }
+        preview.innerHTML = lines.length ? lines.join("") : '<span class="placeholder">Заполните хотя бы один опрос...</span>';
+      };
+      ["ellis_total","ellis_strong","nps_p","nps_d"].forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+    },
+  },
+
+  // 16. NSM + OMTM
+  {
+    title: "Одна главная метрика",
+    subtitle: "North Star Metric и текущая стадия проекта.",
+    body: () => `
+      <p>У зрелого продукта обычно есть одна главная метрика, которая отражает ценность для пользователя. Все остальные либо ведут к ней, либо от нее зависят. Это и есть <strong>North Star Metric (NSM)</strong>.</p>
+      <ul>
+        <li>Airbnb - ночи, забронированные за период</li>
+        <li>Spotify - время прослушивания</li>
+        <li>Slack - сообщения, отправленные внутри команд</li>
+        <li>Landed - количество вакансий, залогированных пользователем за неделю. Не просмотры, не регистрации, а действие, ради которого продукт существует.</li>
+      </ul>
+      <p><strong>OMTM (One Metric That Matters)</strong> - идея из книги Алистера Кролла и Бена Йосковица «Lean Analytics». В каждый момент у продукта есть одна метрика, на которой стоит фокусироваться, и она меняется со стадией:</p>
+      <ul>
+        <li><strong>Эмпатия</strong> (исследуете идею) - количество интервью, паттерны в ответах</li>
+        <li><strong>Стикинесс</strong> (есть продукт, проверяете, цепляет ли) - retention, частота возвращений</li>
+        <li><strong>Виральность</strong> (цепляет, проверяете, рассказывают ли) - органические рефералы</li>
+        <li><strong>Выручка</strong> (рассказывают, проверяете, платят ли) - конверсия в оплату, ARPU</li>
+        <li><strong>Масштаб</strong> (платят, теперь растете) - CAC, LTV, unit economics</li>
+      </ul>
+      <p>Для пет-проекта чаще всего актуальна стадия «стикинесс». Тогда OMTM - retention. Считать виральность или выручку, пока непонятно, возвращаются ли люди, обычно преждевременно.</p>
+      <div class="designer-note">
+        На собесе ответ «NSM моего продукта - количество залогированных подач в неделю, потому что это действие, ради которого приходят» звучит сильнее, чем «количество пользователей». Если добавить стадию: «сейчас фокусируюсь на retention, пока 53%», получается уже зрелый продуктовый ответ.
+      </div>
+    `,
+    workspace: () => {
+      const stages = [
+        { key: "empathy", label: "Эмпатия", hint: "Исследуете идею. OMTM: интервью, паттерны." },
+        { key: "sticky", label: "Стикинесс", hint: "Есть продукт. OMTM: retention." },
+        { key: "viral", label: "Виральность", hint: "Цепляет. OMTM: органические рефералы." },
+        { key: "revenue", label: "Выручка", hint: "Рассказывают. OMTM: конверсия в оплату." },
+        { key: "scale", label: "Масштаб", hint: "Платят. OMTM: CAC, LTV." },
+      ];
+      const selected = work.omtm_stage || "";
+      return `
+        <div class="panel-label"><span>Ваша главная метрика</span><span class="saved-indicator">сохранено</span></div>
+        <div class="panel">
+          <div class="sheet-block">
+            <label class="sheet-label">North Star Metric (одна фраза)</label>
+            <input class="sheet" id="nsm_text" placeholder="Количество залогированных подач в неделю">
+          </div>
+          <div class="sheet-block">
+            <label class="sheet-label">Стадия проекта</label>
+            ${stages.map(s => `
+              <div class="choice-card ${selected === s.key ? "selected" : ""}" data-key="${s.key}" style="padding:10px 12px;margin-bottom:6px;">
+                <h5 style="margin:0 0 2px;font-size:12px;">${s.label}</h5>
+                <p style="font-size:11.5px;">${s.hint}</p>
+              </div>
+            `).join("")}
+          </div>
+          <div class="sheet-block">
+            <label class="sheet-label">Что сейчас мерите по этой стадии</label>
+            <input class="sheet" id="omtm_text" placeholder="Retention на второй неделе - 53%">
+          </div>
+        </div>
+      `;
+    },
+    init: () => {
+      bindInput(document.getElementById("nsm_text"), "nsm_text");
+      bindInput(document.getElementById("omtm_text"), "omtm_text");
+      document.querySelectorAll(".choice-card").forEach(card => {
+        card.onclick = () => {
+          work.omtm_stage = card.dataset.key;
+          document.querySelectorAll(".choice-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          save();
+        };
+      });
+    },
+  },
+
+  // 17. RICE + JTBD
+  {
+    title: "Приоритизация и задача продукта",
+    subtitle: "RICE для выбора фич и JTBD для формулировки работы.",
+    body: () => `
+      <p>Когда идей больше, чем времени, помогает простой счет. <strong>RICE</strong> - фреймворк приоритизации фич от Intercom. Четыре параметра:</p>
+      <ul>
+        <li><strong>Reach</strong> - скольких пользователей затронет за период (например, за месяц)</li>
+        <li><strong>Impact</strong> - насколько сильно повлияет (шкала: 0.25 / 0.5 / 1 / 2 / 3)</li>
+        <li><strong>Confidence</strong> - насколько вы уверены в оценках (%)</li>
+        <li><strong>Effort</strong> - сколько усилий нужно (в человеко-неделях)</li>
+      </ul>
+      <p>Формула: <code class="inline">(Reach × Impact × Confidence) / Effort = RICE-скор</code>.</p>
+      <p>Например, для Landed две конкурирующие фичи могли дать:</p>
+      <ul>
+        <li>Авто-лог из почты: Reach 15, Impact 3, Confidence 60%, Effort 3 нед. RICE = 9.0.</li>
+        <li>Темная тема: Reach 15, Impact 0.5, Confidence 90%, Effort 0.5 нед. RICE = 13.5.</li>
+      </ul>
+      <p>Темная тема выигрывает по скору (меньше усилий), но авто-лог сильнее по импакту. Обсуждение такого компромисса на собесе обычно звучит зрело.</p>
+      <p><strong>JTBD (Jobs to Be Done)</strong> - теория Клэйтона Кристенсена: люди не покупают продукт, они «нанимают» его на конкретную работу. Формулировка задачи:</p>
+      <p style="font-family:'SF Mono',Menlo,monospace;font-size:13px;background:var(--code-bg);padding:8px 12px;border-radius:6px;">«Когда я [ситуация], я хочу [мотивация], чтобы [результат]»</p>
+      <p>Для Landed: «Когда я подаюсь на 10+ вакансий в неделю, я хочу видеть, кто ответил и кто молчит, чтобы не терять время на мертвые подачи».</p>
+      <p>Метрики JTBD строятся вокруг работы: как быстро продукт ее выполняет (время добавления вакансии - 40 сек против 3 минут вручную), насколько полно (все ли подачи залогированы), как часто работа возникает (каждый день - значит высокая частота и высокая ценность).</p>
+      <div class="designer-note">
+        На собесе таблицу RICE рисовать не нужно. Достаточно сказать: «У меня было несколько идей, я приоритизировала через RICE - оценила охват, влияние, уверенность и трудозатраты. Начала с X, потому что при меньших усилиях он давал больший охват». JTBD-формулировка хорошо работает в ответе на «какую проблему решает ваш продукт».
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>RICE для двух фич + JTBD</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">JTBD: ситуация / мотивация / результат</label>
+          <input class="sheet" id="jtbd_when" placeholder="Когда я подаюсь на 10+ вакансий в неделю..." style="margin-bottom:6px;">
+          <input class="sheet" id="jtbd_want" placeholder="...я хочу видеть, кто ответил..." style="margin-bottom:6px;">
+          <input class="sheet" id="jtbd_so" placeholder="...чтобы не терять время на мертвые подачи.">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Фича A: название</label>
+          <input class="sheet" id="rice_a_name" placeholder="Авто-лог из почты">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:6px;">
+            <input class="sheet" id="rice_a_r" placeholder="Reach" type="number">
+            <input class="sheet" id="rice_a_i" placeholder="Impact" type="number" step="0.25">
+            <input class="sheet" id="rice_a_c" placeholder="Conf %" type="number">
+            <input class="sheet" id="rice_a_e" placeholder="Effort" type="number" step="0.5">
+          </div>
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Фича B: название</label>
+          <input class="sheet" id="rice_b_name" placeholder="Темная тема">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:6px;">
+            <input class="sheet" id="rice_b_r" placeholder="Reach" type="number">
+            <input class="sheet" id="rice_b_i" placeholder="Impact" type="number" step="0.25">
+            <input class="sheet" id="rice_b_c" placeholder="Conf %" type="number">
+            <input class="sheet" id="rice_b_e" placeholder="Effort" type="number" step="0.5">
+          </div>
+        </div>
+        <div class="preview-label">RICE-скоры</div>
+        <div class="preview-box" id="rice_preview"><span class="placeholder">Заполните параметры...</span></div>
+      </div>
+    `,
+    init: () => {
+      const all = ["jtbd_when","jtbd_want","jtbd_so","rice_a_name","rice_a_r","rice_a_i","rice_a_c","rice_a_e","rice_b_name","rice_b_r","rice_b_i","rice_b_c","rice_b_e"];
+      all.forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("rice_preview");
+      const score = (r, i, c, e) => {
+        if (!r || !i || !c || !e) return null;
+        return ((r * i * (c / 100)) / e).toFixed(1);
+      };
+      const update = () => {
+        const a = score(parseFloat(work.rice_a_r), parseFloat(work.rice_a_i), parseFloat(work.rice_a_c), parseFloat(work.rice_a_e));
+        const b = score(parseFloat(work.rice_b_r), parseFloat(work.rice_b_i), parseFloat(work.rice_b_c), parseFloat(work.rice_b_e));
+        const lines = [];
+        if (a !== null) lines.push(`<div><strong>${escape(work.rice_a_name) || "Фича A"}:</strong> RICE = ${a}</div>`);
+        if (b !== null) lines.push(`<div style="margin-top:6px;"><strong>${escape(work.rice_b_name) || "Фича B"}:</strong> RICE = ${b}</div>`);
+        if (a !== null && b !== null) {
+          const winner = parseFloat(a) >= parseFloat(b) ? (work.rice_a_name || "Фича A") : (work.rice_b_name || "Фича B");
+          lines.push(`<div style="margin-top:10px;color:var(--accent);">По скору ведет: <strong>${escape(winner)}</strong>.</div>`);
+        }
+        preview.innerHTML = lines.length ? lines.join("") : '<span class="placeholder">Заполните параметры...</span>';
+      };
+      all.forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+    },
+  },
+
+  // 18. WHEN NUMBERS ARE FEW
+  {
+    title: "Когда чисел мало",
+    subtitle: "Что делать, если у вас 12 пользователей и нет аналитики.",
+    body: () => `
+      <p>Маленькая выборка и отсутствие продакшн-аналитики не означают, что говорить нечего. Сигнал можно нащупать несколькими способами.</p>
+      <p><strong>Оценка Ферми</strong> - прикидка на салфетке. Метод физика Энрико Ферми: когда точных данных нет, прикидывают порядок величины через логическую цепочку. Числа честные, логика прозрачная, и на собесе это звучит убедительнее, чем «ну, людям понравилось».</p>
+      <p>Пример для Landed: средний дизайнер подает на 10-15 вакансий в неделю, ручной лог одной подачи занимает около 3 минут. 15 × 3 = 45 минут в неделю, ~3 часа в месяц на человека. Если 15 человек пользуются - около 45 часов сэкономленного ручного труда в месяц.</p>
+      <p><strong>Proxy-метрики</strong> - когда то, что нужно, нельзя измерить напрямую, берут заместительную метрику, которая с целевой коррелирует. «Удовлетворенность» напрямую не померить, а количество обращений в поддержку (чем меньше, тем лучше) - подходящий proxy. Для Landed: «Я не могла напрямую померить точность AI-парсинга, но замерила, сколько полей пользователь правит после автозаполнения. В среднем 0.8 поля из 6 - proxy для точности около 87%».</p>
+      <p><strong>Качественные данные</strong> тоже метрика. Один живой отзыв иногда весит больше, чем процент. Полезно собирать прямые цитаты пользователей (скриншоты, не пересказ), наблюдения за использованием (где застревают), запросы на фичи (что просят чаще).</p>
+      <p><strong>Временные метрики</strong>. Время понимают все: не нужно объяснять, почему «3 минуты вместо 15» хорошо. Что мерить: time to value (от регистрации до первого полезного результата), time saved (по сравнению с альтернативой), time on task (сколько занимает действие). Время можно замерить секундомером без аналитики и инструментов.</p>
+      <p><strong>Leading vs Lagging.</strong> Запаздывающие метрики (lagging) - то, что уже случилось (NPS за квартал, churn, регистрации за месяц). Опережающие (leading) - ранние сигналы того, что случится дальше (например, добавление 3+ вакансий в первый день предсказывает retention). Для Landed такие пользователи возвращались в 80% случаев, те, кто добавил одну, - в 20%.</p>
+      <div class="designer-note">
+        Что собрать в питч. Удобная стартовая комбинация: AARRR (хотя бы 2-3 шага с числами) + оценка Ферми (про ценность, когда данных мало) + одна живая цитата. Более продвинутая: NSM + HEART (Task success + Retention) + тест Эллиса. Чего стоит избегать: чисел без вывода («у нас 200 регистраций - и что?»), выдуманных процентов («+200% конверсии на трех пользователях» обычно читается как мем), отсутствия чисел вообще (если нет - поставьте живую цитату).
+      </div>
+    `,
+    workspace: () => `
+      <div class="panel-label"><span>Прикидка по Ферми и подбор метрик в питч</span><span class="saved-indicator">сохранено</span></div>
+      <div class="panel">
+        <div class="sheet-block">
+          <label class="sheet-label">Действие, которое замеряем (например: ручной лог одной подачи)</label>
+          <input class="sheet" id="fermi_action" placeholder="Ручной лог одной подачи">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Сколько раз в неделю (на пользователя)</label>
+          <input class="sheet" id="fermi_freq" placeholder="15" type="number">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Минут на одно действие</label>
+          <input class="sheet" id="fermi_min" placeholder="3" type="number">
+        </div>
+        <div class="sheet-block">
+          <label class="sheet-label">Активных пользователей</label>
+          <input class="sheet" id="fermi_users" placeholder="15" type="number">
+        </div>
+        <div class="preview-label">Прикидка</div>
+        <div class="preview-box" id="fermi_preview"><span class="placeholder">Заполните хотя бы частоту и время...</span></div>
+        <div style="margin-top:18px;">
+          <div class="panel-label" style="margin-bottom:8px;">Что беру в питч (выберите 2-3)</div>
+          <div id="pitch_picks"></div>
+        </div>
+      </div>
+    `,
+    init: () => {
+      ["fermi_action","fermi_freq","fermi_min","fermi_users"].forEach(k => bindInput(document.getElementById(k), k));
+      const preview = document.getElementById("fermi_preview");
+      const update = () => {
+        const f = parseFloat(work.fermi_freq), m = parseFloat(work.fermi_min), u = parseFloat(work.fermi_users);
+        if (!f || !m) {
+          preview.innerHTML = '<span class="placeholder">Заполните хотя бы частоту и время...</span>';
+          return;
+        }
+        const minWeek = f * m;
+        const lines = [`<div>На одного пользователя: <strong>${minWeek}</strong> минут в неделю (~${(minWeek * 4 / 60).toFixed(1)} часа в месяц).</div>`];
+        if (u) {
+          const totalHoursMonth = (minWeek * u * 4 / 60).toFixed(0);
+          lines.push(`<div style="margin-top:6px;">На ${u} активных - около <strong>${totalHoursMonth}</strong> часов сэкономленного ручного труда в месяц.</div>`);
+        }
+        preview.innerHTML = lines.join("");
+      };
+      ["fermi_freq","fermi_min","fermi_users"].forEach(k => document.getElementById(k).addEventListener("input", update));
+      update();
+
+      work.pitch_picks = work.pitch_picks || {};
+      const picks = [
+        ["AARRR (2-3 шага)", "Базовая воронка с числами."],
+        ["HEART (Task success + Retention)", "UX-метрики, которые знают PM и дизайнеры."],
+        ["NSM + текущая стадия", "Одна главная метрика и фокус."],
+        ["Тест Эллиса", "Сильный сигнал даже на 8-10 ответах."],
+        ["NPS", "Стандартный показатель, легко сравнивать."],
+        ["Оценка Ферми", "Прикидка ценности, когда данных мало."],
+        ["RICE для выбора фичи", "Объяснение, как принимали решение."],
+        ["JTBD-формулировка", "Ответ на «какую проблему решает продукт»."],
+        ["Одна качественная цитата", "Оживляет любые числа."],
+        ["Time to value / Time saved", "Время как универсальная единица."],
+      ];
+      const cont = document.getElementById("pitch_picks");
+      cont.innerHTML = picks.map((p, i) => `
+        <div class="check-item">
+          <input type="checkbox" id="pp${i}" ${work.pitch_picks[i] ? "checked" : ""}>
+          <label for="pp${i}">${p[0]}<span class="hint">${p[1]}</span></label>
+        </div>
+      `).join("");
+      cont.querySelectorAll("input").forEach((cb, i) => {
+        cb.onchange = () => { work.pitch_picks[i] = cb.checked; save(); };
+      });
+    },
+  },
+];
+
+const lessonListEl = document.getElementById("lessonList");
+const lessonTextEl = document.getElementById("lessonText");
+const workspaceEl = document.getElementById("workspace");
+const topTitle = document.getElementById("topTitle");
+const progress = document.getElementById("progress");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+let currentIdx = 0;
+
+function buildSidebar() {
+  lessonListEl.innerHTML = "";
+  lessons.forEach((l, i) => {
+    const li = document.createElement("li");
+    li.className = "lesson-item" + (i === currentIdx ? " active" : "") + (i < currentIdx ? " done" : "");
+    li.innerHTML = `<span class="lesson-num">${String(i + 1).padStart(2, "0")}</span><span>${l.title}</span>`;
+    li.onclick = () => loadLesson(i);
+    lessonListEl.appendChild(li);
+  });
+}
+
+function loadLesson(i, keepIndex = false) {
+  if (!keepIndex) currentIdx = i;
+  const l = lessons[currentIdx];
+  topTitle.textContent = l.title;
+  progress.textContent = `${currentIdx + 1} / ${lessons.length}`;
+  lessonTextEl.innerHTML = `
+    <h3>${l.title}</h3>
+    ${l.subtitle ? `<p class="subtitle">${l.subtitle}</p>` : ""}
+    ${l.body()}
+  `;
+  workspaceEl.innerHTML = l.workspace();
+  if (l.init) l.init();
+  buildSidebar();
+  prevBtn.disabled = currentIdx === 0;
+  nextBtn.disabled = currentIdx === lessons.length - 1;
+  if (!keepIndex) {
+    try { localStorage.setItem("career_leverage_lesson", currentIdx); } catch {}
+  }
+}
+
+prevBtn.onclick = () => currentIdx > 0 && loadLesson(currentIdx - 1);
+nextBtn.onclick = () => currentIdx < lessons.length - 1 && loadLesson(currentIdx + 1);
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight" && !nextBtn.disabled) nextBtn.click();
+  if (e.key === "ArrowLeft" && !prevBtn.disabled) prevBtn.click();
+});
+
+let saved = 0;
+try { saved = parseInt(localStorage.getItem("career_leverage_lesson")) || 0; } catch {}
+loadLesson(Math.min(saved, lessons.length - 1));
+</script>
+</body>
+</html>

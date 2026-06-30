@@ -1,0 +1,908 @@
+@import url("https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap");
+
+/* Promo / landing page — dark "celestial" theme from the Landed Figma file.
+   Self-contained so it can render edge-to-edge outside the app chrome. */
+
+.promo {
+  --promo-bg: #121212;
+  --promo-gold: #d8a84b;
+  --promo-line: rgb(255 255 255 / 0.1);
+
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
+  color: #fff;
+  font-family: var(--font-sans);
+
+  /* Very subtle black rhombi texture — solid (hard-stop) tones, no gradient */
+  background-color: var(--promo-bg);
+  background-image: repeating-conic-gradient(
+    from 30deg,
+    rgb(255 255 255 / 0.014) 0% 120deg,
+    rgb(255 255 255 / 0.03) 0% 50%
+  );
+  background-size: 4em 6.928em;
+}
+
+/* Faint ambient warmth at the top — kept low so the sun reads glow-free at rest */
+.promo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 40% at 50% 4%,
+    rgb(216 168 75 / 0.05),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Dotted vertical rails framing the content, full page height */
+.promo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1240px, 96vw);
+  border-left: 1px dotted rgb(255 255 255 / 0.16);
+  border-right: 1px dotted rgb(255 255 255 / 0.16);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.promo__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---- Hero ---- */
+.promo__sun-btn {
+  position: relative;
+  margin-top: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+  border-radius: 9999px;
+  transition: transform 0.2s ease;
+  animation: promo-sun-entry 1s cubic-bezier(0.22, 1.2, 0.32, 1) both;
+}
+@keyframes promo-sun-entry {
+  0%   { opacity: 0; transform: translateY(48px); }
+  70%  { opacity: 1; transform: translateY(-8px); }
+  85%  {              transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo__sun-btn { animation: none; }
+}
+.promo__sun-sparkle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation-name: promo-sparkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+/* When the sun is spinning, sparkles burst outward like sparks from a fire */
+.promo__sun-btn.is-spinning .promo__sun-sparkle {
+  animation: promo-sparkle-burst 1.1s ease-out forwards;
+}
+@keyframes promo-sparkle-burst {
+  0%   { opacity: 0;
+         transform: translate(-50%, -50%) scale(0.6); }
+  15%  { opacity: 1;
+         transform: translate(-50%, -50%) scale(1.6); }
+  100% { opacity: 0;
+         transform: translate(
+           calc(-50% + var(--burst-x, 0px)),
+           calc(-50% + var(--burst-y, 0px))
+         ) scale(0.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo__sun-sparkle,
+  .promo__sun-btn.is-spinning .promo__sun-sparkle { animation: none; opacity: 0; }
+}
+.promo__sun-btn:hover {
+  transform: scale(1.04);
+}
+.promo__sun-btn:active {
+  transform: scale(0.97);
+}
+.promo__sun-btn:focus-visible {
+  outline: 2px solid var(--promo-gold);
+  outline-offset: 6px;
+}
+.promo__sun {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  /* No glow at rest — it lights up only while spinning */
+  filter: drop-shadow(0 0 0 rgb(216 168 75 / 0));
+  user-select: none;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.4s ease;
+  will-change: transform, filter;
+}
+.promo__sun.is-spinning {
+  filter: drop-shadow(0 0 40px rgb(216 168 75 / 0.45));
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo__sun {
+    transition: none;
+  }
+}
+
+.promo__headline {
+  font-family: "IM Fell English", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-align: center;
+  max-width: 30rem;
+  margin-top: -1rem; /* pulls into the sun's empty ray space, closer to the disc */
+  font-feature-settings: "dlig" 1;
+}
+
+.promo__subhead {
+  margin-top: 1.1rem;
+  max-width: 30rem;
+  text-align: center;
+  color: rgb(255 255 255 / 0.62);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+
+/* ---- Divider band above the app demo ---- */
+.promo__stage {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2.5rem;
+}
+
+/* Two halves meeting at center → one continuous golden horizon.
+   Sits over the bottom of the demo; `screen` drops the black backing. */
+.promo__divider-band {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  width: min(1240px, 96vw); /* matches the dotted vertical rails — exactly between them */
+  margin-top: -200px; /* overlap further into the demo */
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+}
+.promo__divider-half {
+  width: 50%;
+  height: 190px;
+  object-fit: cover;
+  opacity: 0.9;
+}
+.promo__divider-half--right {
+  transform: scaleX(-1);
+}
+
+.promo__window {
+  position: relative;
+  z-index: 1;
+  width: min(1100px, 92vw);
+  aspect-ratio: 1182 / 560; /* shorter than the original 758 */
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgb(0 0 0 / 0.55);
+  border: 1px solid var(--promo-line);
+  box-shadow:
+    0 40px 120px rgb(0 0 0 / 0.6),
+    inset 0 0 0 1px rgb(255 255 255 / 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.promo__chrome {
+  display: flex;
+  gap: 6px;
+  padding: 6px 16px;
+}
+.promo__dot {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Real product UI shown as a static, non-interactive demo */
+.promo__demo {
+  position: absolute;
+  inset: 30px 0 0;
+  display: flex;
+  gap: 14px;
+  padding: 4px 18px 72px; /* bottom clears the divider spark band */
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Chat sidebar — the AI co-pilot pane */
+.promo__chat {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  flex-shrink: 0;
+  border-radius: var(--radius-bento, 12px);
+  border: 1px solid var(--color-hairline);
+  background: var(--color-surface-1);
+  overflow: hidden;
+}
+.promo__chat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-hairline);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  letter-spacing: 0.01em;
+}
+.promo__chat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+}
+.promo__chat-msgs {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 14px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Chat animation — messages drop in one after another, dots keep typing */
+.promo__chat-msgs > .anim-rise {
+  animation: promo-msg-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.promo__chat-msgs > .anim-rise:nth-child(1) {
+  animation-delay: 0.15s;
+}
+.promo__chat-msgs > .anim-rise:nth-child(2) {
+  animation-delay: 0.9s;
+}
+.promo__chat-msgs > .anim-rise:nth-child(3) {
+  animation-delay: 1.5s;
+}
+.promo__chat-msgs > .anim-rise:nth-child(n + 4) {
+  animation-delay: 0s; /* the congrats message drops in immediately on landing */
+}
+
+@keyframes promo-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo__chat-msgs > .anim-rise {
+    animation: none;
+  }
+}
+.promo__chat-composer {
+  margin: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-hairline-strong);
+  background: var(--color-surface-3);
+  color: var(--color-ink-tertiary);
+  font-size: 0.8125rem;
+}
+
+.promo__board {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ---- Auto-drag animation: a card travels Applied → Offer with a cursor.
+   Position/scroll are driven imperatively by the rAF loop in PromoDemo. ---- */
+.promo__dragzone {
+  position: absolute;
+  left: 332px; /* chat width (300) + demo padding-left (18) + gap (14) */
+  right: 18px;
+  top: 56px;
+  bottom: 80px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.promo__drag-card {
+  position: absolute;
+  top: 42px;
+  left: 1%;
+  width: 19%;
+  min-width: 130px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 0.55);
+  opacity: 0;
+  will-change: left, transform, opacity;
+}
+.promo__drag-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--color-surface-4);
+  color: var(--color-ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.promo__drag-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.promo__drag-l1 {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.promo__drag-l2 {
+  font-size: 0.6875rem;
+  color: var(--color-ink-subtle);
+  white-space: nowrap;
+}
+
+.promo__cursor {
+  position: absolute;
+  top: 58px;
+  left: 9%;
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.5));
+  opacity: 0;
+  transition: transform 0.12s ease;
+  will-change: left, transform, opacity;
+}
+
+/* It's a static demo — hide every inner scrollbar */
+.promo__demo *::-webkit-scrollbar {
+  display: none;
+}
+.promo__demo * {
+  scrollbar-width: none;
+}
+
+/* ---- About — two feature image slots ---- */
+.promo__about {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 60px;
+  width: min(1240px, 92vw);
+  margin-top: 2rem;
+  margin-bottom: 6rem;
+}
+
+.promo__about-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The reserved image area — drop a screenshot in here later */
+.promo__about-media {
+  position: relative;
+  aspect-ratio: 636 / 458;
+  width: 100%;
+  border-radius: 16px;
+  background: #313131;
+  border: 1px dashed rgb(255 255 255 / 0.14);
+  background-image: radial-gradient(
+    rgb(255 255 255 / 0.05) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  overflow: hidden;
+}
+
+.promo__about-media-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.3);
+}
+
+.promo__about-title {
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+  line-height: 1.1;
+  margin-top: 1.75rem;
+}
+
+.promo__about-copy {
+  margin-top: 0.75rem;
+  max-width: 34ch;
+  color: rgb(255 255 255 / 0.6);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .promo__about {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem;
+    margin-top: 4rem;
+  }
+}
+
+/* ---- CTAs ---- */
+.promo__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem; /* sits close under the demo + divider */
+}
+
+.promo__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding-inline: 1.75rem;
+  border-radius: 9999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: transform 0.15s ease, background-color 0.15s ease,
+    border-color 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.promo__btn:active {
+  transform: scale(0.98);
+}
+.promo__btn--primary {
+  background: #c7a14f;
+  color: #121212;
+  border: 1px solid transparent;
+}
+.promo__btn--primary:hover {
+  background: #d8b266;
+}
+.promo__btn--ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgb(255 255 255 / 0.45);
+}
+.promo__btn--ghost:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.promo__cta--hero {
+  margin-top: 1.75rem;
+  align-items: center;
+  gap: 0;
+}
+
+.promo__cta-arrow-wrap {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.promo__cta-arrow {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.promo__cta-sparkle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  /* animation-name + duration applied only on hover */
+}
+.promo__cta--hero:hover .promo__cta-sparkle {
+  animation-name: promo-sparkle;
+}
+@keyframes promo-sparkle {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  50%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo__cta-sparkle { animation: none; opacity: 0; }
+}
+
+/* ---- Testimonials marquee ---- */
+.promo__marquee {
+  position: relative;
+  width: 100%;
+  margin-top: 5rem;
+  margin-bottom: 4rem;
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--promo-line);
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.015);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.promo__track {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: promo-marquee 38s linear infinite;
+}
+
+.promo__quote {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.9375rem;
+}
+.promo__quote span {
+  color: var(--promo-gold);
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 1.25rem;
+}
+
+@keyframes promo-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo__track {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .promo__divider-half {
+    height: 120px;
+  }
+  .promo__window {
+    aspect-ratio: 1182 / 760;
+    margin-top: -20px;
+  }
+  .promo__demo {
+    inset: 44px 0 0;
+    padding: 8px 12px 12px;
+  }
+  /* On small screens the chat pane would crowd the board — show the board only */
+  .promo__chat {
+    display: none;
+  }
+  /* The drag overlay is anchored to the chat-offset layout — hide it here */
+  .promo__dragzone {
+    display: none;
+  }
+}
+
+/* ======================================================================
+   Navigation + mega menu
+   ====================================================================== */
+.promo__anchor {
+  position: absolute;
+  top: 0;
+}
+
+.promo-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background: rgb(18 18 18 / 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--promo-line);
+}
+.promo-nav__inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 64px;
+  width: min(1240px, 94vw);
+  margin: 0 auto;
+}
+.promo-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 1.25rem;
+  color: #fff;
+  text-decoration: none;
+}
+.promo-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 1rem;
+}
+.promo-nav__item {
+  position: relative;
+}
+.promo-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.promo-nav__link:hover {
+  color: #fff;
+  background: rgb(255 255 255 / 0.06);
+}
+.promo-nav__caret {
+  transition: transform 0.2s ease;
+}
+.promo-nav__link[aria-expanded="true"] .promo-nav__caret {
+  transform: rotate(180deg);
+}
+.promo-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.promo-nav__signin {
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  transition: color 0.15s ease;
+}
+.promo-nav__signin:hover {
+  color: #fff;
+}
+.promo-nav__cta {
+  height: 40px;
+  padding-inline: 1.1rem;
+  font-size: 0.875rem;
+}
+
+/* Mega menu panel */
+.promo-mega {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 660px;
+  max-width: 90vw;
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: rgb(26 26 26 / 0.97);
+  border: 1px solid var(--promo-line);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.promo-mega[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.promo-mega__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.promo-mega__heading {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--promo-gold);
+  margin-bottom: 0.5rem;
+  padding-inline: 0.6rem;
+}
+.promo-mega__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+.promo-mega__link:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+.promo-mega__link-label {
+  color: #fff;
+  font-size: 0.9375rem;
+}
+.promo-mega__link-desc {
+  color: rgb(255 255 255 / 0.5);
+  font-size: 0.8125rem;
+}
+.promo-mega__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--promo-line);
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.875rem;
+}
+.promo-mega__foot-link {
+  color: var(--promo-gold);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+
+/* ======================================================================
+   Footer
+   ====================================================================== */
+.promo-footer {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-top: 1px solid var(--promo-line);
+  background: rgb(15 15 15 / 0.6);
+}
+.promo-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+  justify-content: space-between;
+  width: min(1240px, 92vw);
+  margin: 0 auto;
+  padding: 4rem 0 3rem;
+}
+.promo-footer__brand {
+  max-width: 320px;
+}
+.promo-footer__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 1.5rem;
+  color: #fff;
+  text-decoration: none;
+}
+.promo-footer__tagline {
+  margin-top: 0.75rem;
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.promo-footer__cta {
+  margin-top: 1.5rem;
+  height: 44px;
+}
+.promo-footer__cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3.5rem;
+}
+.promo-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.promo-footer__heading {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.4);
+  margin-bottom: 0.35rem;
+}
+.promo-footer__link {
+  color: rgb(255 255 255 / 0.65);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.promo-footer__link:hover {
+  color: #fff;
+}
+.promo-footer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  width: min(1240px, 92vw);
+  margin: 0 auto;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--promo-line);
+  color: rgb(255 255 255 / 0.4);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 900px) {
+  .promo-nav__links {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .promo-nav__signin {
+    display: none;
+  }
+  .promo-footer__inner {
+    gap: 2rem;
+  }
+  .promo-footer__cols {
+    gap: 2rem;
+  }
+}

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Чеклист запуска — Landed</title>
+<style>
+  :root {
+    --bg: #0f0f10;
+    --surface: #1a1a1d;
+    --surface-2: #232327;
+    --border: #2e2e34;
+    --text: #f4f4f5;
+    --muted: #9ca0a8;
+    --accent: #5ee2a0;
+    --accent-soft: #5ee2a022;
+    --object: #5ee2a0;
+    --attr: #c5b4ff;
+    --cta: #ff9d8a;
+    --content: #ffd479;
+    --danger: #ff7a85;
+    --warn: #ffb84d;
+    --ok: #5ee2a0;
+    --code-bg: #18181b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  .app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+  .brand { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .brand h1 { font-size: 16px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .brand p { font-size: 12px; color: var(--muted); margin: 0; }
+  .lesson-list { list-style: none; padding: 0; margin: 0; }
+  .lesson-item {
+    padding: 10px 24px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s ease;
+  }
+  .lesson-item:hover { color: var(--text); background: var(--surface-2); }
+  .lesson-item.active {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+  }
+  .lesson-item.done .lesson-num { color: var(--accent); }
+  .lesson-item.done .lesson-num::after { content: " ✓"; }
+  .lesson-num {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    width: 28px;
+  }
+  .lesson-item.active .lesson-num { color: var(--accent); }
+
+  .main { display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+  .topbar {
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .topbar h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+  .topbar .progress { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .content {
+    overflow-y: auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .lesson-text h3 { font-size: 22px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .lesson-text .subtitle { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .lesson-text p { font-size: 14px; margin: 12px 0; }
+  .lesson-text ul { font-size: 14px; padding-left: 18px; }
+  .lesson-text li { margin: 4px 0; }
+  .designer-note {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .designer-note strong { color: var(--accent); }
+  .danger-note {
+    background: rgb(255 122 133 / 0.08);
+    border-left: 3px solid var(--danger);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .danger-note strong { color: var(--danger); }
+  code.inline {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--accent);
+  }
+
+  .workspace { position: sticky; top: 0; display: flex; flex-direction: column; gap: 12px; }
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 380px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .check-item label { flex: 1; cursor: pointer; }
+  .check-item .hint { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .check-item.done label { color: var(--muted); text-decoration: line-through; }
+
+  .step-progress {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .step-progress .bar {
+    flex: 1;
+    height: 6px;
+    margin: 0 12px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .step-progress .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .saved-indicator {
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .saved-indicator.show { opacity: 1; }
+
+  .bottombar {
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .btn {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #062818;
+    font-weight: 700;
+  }
+  .btn.primary:hover:not(:disabled) { background: #7eebb5; border-color: #7eebb5; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: 700;
+  }
+  .tag.required { background: rgb(255 122 133 / 0.18); color: var(--danger); }
+  .tag.optional { background: var(--surface-2); color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Чеклист запуска</h1>
+      <p>Landed — выкатить, ничего не сломав.</p>
+    </div>
+    <ul class="lesson-list" id="lessonList"></ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h2 id="topTitle">—</h2>
+      <span class="progress" id="progress">0 / 0</span>
+    </header>
+
+    <section class="content">
+      <div class="lesson-text" id="lessonText"></div>
+      <div class="workspace" id="workspace"></div>
+    </section>
+
+    <footer class="bottombar">
+      <button class="btn ghost" id="resetBtn">Сбросить всё</button>
+      <div style="display:flex;gap:12px;">
+        <button class="btn" id="prevBtn">← Назад</button>
+        <button class="btn primary" id="nextBtn">Далее →</button>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = "launch_checklist_v1";
+const state = (() => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { checked: {}, current: 0 }; }
+  catch { return { checked: {}, current: 0 }; }
+})();
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+}
+
+const STEPS = [
+  {
+    id: "refactor",
+    title: "Наводим порядок в коде",
+    subtitle: "Сначала уборка, потом релиз.",
+    text: `
+      <p>Рефакторинг — это когда ты делаешь код красивее и проще, но <strong>приложение работает ровно так же, как раньше</strong>. Никаких новых кнопок, никаких новых фич — просто уборка.</p>
+      <p>Если после рефакторинга что-то стало работать по-другому — это уже не рефакторинг, а переписывание. Это другая история, и её планируют отдельно.</p>
+      <p>В файле <code class="inline">docs/refactor.md</code> лежит готовый промпт. Открой Claude Code, скопируй промпт, и Claude проведёт тебя шаг за шагом.</p>
+      <div class="designer-note"><strong>Главное правило:</strong> один коммит — одна идея. И после каждого коммита запускаем три проверки:<br>
+      • <code class="inline">npm run build</code> — собирается ли сайт<br>
+      • <code class="inline">npm test</code> — проходят ли тесты<br>
+      • <code class="inline">npx tsc --noEmit</code> — нет ли ошибок в типах<br><br>
+      Если хоть одна стала красной — откати этот коммит и возьми кусок поменьше.</div>
+      <p><strong>Зоны, которые лучше не трогать без необходимости</strong> — там живёт логин, защита данных и доступ к базе. Если правда нужно — спроси у того, кто разбирается:</p>
+      <ul>
+        <li><code class="inline">middleware.ts</code> — кто куда может зайти</li>
+        <li><code class="inline">lib/supabase/</code> — подключение к базе</li>
+        <li><code class="inline">app/auth/</code> — вход через ссылку на почту</li>
+        <li><code class="inline">app/api/</code> — серверные роуты</li>
+      </ul>
+    `,
+    items: [
+      { id: "ref-1", label: "Прочитал(а) промпт в docs/refactor.md", required: true },
+      { id: "ref-2", label: "Сделал(а) новую ветку в git", hint: "git checkout -b refactor/&lt;что-я-чищу&gt;", required: true },
+      { id: "ref-3", label: "Все три проверки зелёные до начала", hint: "npm run build, npm test, npx tsc --noEmit", required: true },
+      { id: "ref-4", label: "Выбрал(а) ОДНУ штуку и не пытаюсь чинить три сразу", required: true },
+      { id: "ref-5", label: "После каждого коммита снова прогнал(а) проверки — все зелёные", required: true },
+      { id: "ref-6", label: "Открыл(а) сайт и проверил(а), что фича работает как до уборки" },
+      { id: "ref-7", label: "Сделал(а) Pull Request с описанием — что менял(а) и что НЕ менял(а)" },
+    ]
+  },
+  {
+    id: "cyber",
+    title: "Проверка безопасности",
+    subtitle: "Закрываем дыры, пока их не нашли другие.",
+    text: `
+      <p>Это как проверить замки и окна перед уходом из дома. Прогоняешь приложение через список «а что если кто-то попробует сломать?» и закрываешь все дыры, которые нашёл.</p>
+      <p>В файле <code class="inline">docs/security-check-prompt.md</code> лежит готовый промпт. Дай его Claude — он пройдётся по всем местам, где обычно прячутся проблемы.</p>
+      <p>Каждая найденная проблема получает <strong>цвет вероятности</strong> (🟢 неопасно, 🟡 надо посмотреть, 🔴 чинить срочно) и <strong>приоритет</strong> (🚨 сейчас, ⏰ на этой неделе, 📅 в этом месяце, 🗓️ когда-нибудь).</p>
+      <div class="danger-note"><strong>Правило:</strong> перед деплоем закрой всё, что 🚨 и ⏰. Остальное можно после запуска.</div>
+      <p><strong>На что обращать особое внимание:</strong></p>
+      <ul>
+        <li>В Supabase каждая таблица должна быть защищена так, чтобы юзер видел только свои данные (это называется RLS — Row Level Security)</li>
+        <li>Секретные ключи (типа OpenAI) НЕ должны попадать в браузер</li>
+        <li>Все серверные API должны проверять «а ты вообще кто?» перед тем как что-то делать</li>
+      </ul>
+    `,
+    items: [
+      { id: "cyb-1", label: "Дал(а) Claude промпт из docs/security-check-prompt.md", required: true },
+      { id: "cyb-2", label: "Все находки 🚨 Сейчас исправлены", required: true },
+      { id: "cyb-3", label: "Все находки ⏰ На этой неделе исправлены", required: true },
+      { id: "cyb-4", label: "npm audit не показывает страшных дыр (нет high/critical)", required: true, hint: "В терминале: npm audit --omit=dev" },
+      { id: "cyb-5", label: "На каждой таблице в Supabase включена защита RLS", required: true, hint: "Чтобы юзер видел только СВОИ данные, а не чужие" },
+      { id: "cyb-6", label: "Файл .env.local не попадает в git", required: true, hint: "Это файл с секретными ключами — он не должен быть в репозитории" },
+      { id: "cyb-7", label: "Серверные секреты НЕ помечены префиксом NEXT_PUBLIC_", hint: "NEXT_PUBLIC_ = «отправь в браузер», для секретов это смерть" },
+      { id: "cyb-8", label: "На API стоит ограничение по скорости запросов", hint: "Чтобы боты не задолбали — Vercel WAF или upstash-ratelimit" },
+    ]
+  },
+  {
+    id: "a11y",
+    title: "Доступность",
+    subtitle: "Сайтом должен мочь пользоваться вообще каждый.",
+    text: `
+      <p>Доступность (a11y, от англ. «accessibility») — это про то, чтобы твоим сайтом могли пользоваться <strong>все</strong>:</p>
+      <ul>
+        <li>Слепой человек со скринридером (программа, которая читает экран вслух)</li>
+        <li>Человек, у которого сломалась мышка и есть только клавиатура</li>
+        <li>Бабушка, которая плохо видит мелкий текст</li>
+        <li>Человек с дальтонизмом, который не отличает красный от зелёного</li>
+      </ul>
+      <p>В Chrome открой <strong>DevTools (F12) → Lighthouse → выбери «Accessibility» → Analyze</strong>. Получишь оценку и список того, что починить.</p>
+      <div class="designer-note"><strong>Тест за 30 секунд:</strong> попробуй пройти весь сайт только с помощью <kbd>Tab</kbd> и <kbd>Enter</kbd>. Не трогая мышку. Если где-то застрял или потерял фокус (не видно, на чём ты сейчас) — это баг.</div>
+    `,
+    items: [
+      { id: "a11y-1", label: "Lighthouse поставил оценку 95+ на /promo", required: true },
+      { id: "a11y-2", label: "Lighthouse поставил оценку 95+ на /sign-in", required: true },
+      { id: "a11y-3", label: "Lighthouse поставил оценку 95+ на дашборде", required: true },
+      { id: "a11y-4", label: "У каждой картинки есть текстовое описание (alt)", required: true, hint: "Для декоративных картинок: alt=\"\" (пустое, но обязательно есть)" },
+      { id: "a11y-5", label: "Текст хорошо читается на фоне", hint: "Контраст ≥ 4.5:1 для обычного текста. Проверить можно на webaim.org/resources/contrastchecker" },
+      { id: "a11y-6", label: "Могу пройти весь сайт без мышки — только клавиатурой" },
+      { id: "a11y-7", label: "Когда нажимаю Tab — видно, куда переместился фокус", hint: "Должна быть рамка вокруг активной кнопки/ссылки" },
+      { id: "a11y-8", label: "У каждого поля формы есть подпись (label)", hint: "Не просто placeholder в самом поле — отдельная подпись над ним" },
+      { id: "a11y-9", label: "Кнопки сделаны через &lt;button&gt;, а не через &lt;div onClick&gt;", hint: "Скринридер понимает &lt;button&gt;, а &lt;div&gt; — нет" },
+      { id: "a11y-10", label: "Заголовки идут по порядку: h1 → h2 → h3, без прыжков" },
+    ]
+  },
+  {
+    id: "seo",
+    title: "SEO — чтобы Google нашёл",
+    subtitle: "И чтобы ссылка красиво выглядела при шеринге.",
+    text: `
+      <p>SEO (Search Engine Optimization) — это всё, что помогает Google понять, о чём твой сайт, и показать его людям, когда они ищут что-то похожее. Без базовых тегов твой лендинг для Google невидим.</p>
+      <p>Плюс — это про то, как выглядит ссылка, когда её скидывают в Slack, Twitter или WhatsApp. Без картинки и описания люди просто не кликают.</p>
+      <p>В Next.js большинство этого делается через экспорт <code class="inline">metadata</code> в файле страницы. Это просто.</p>
+      <div class="designer-note"><strong>Тест за минуту:</strong> вставь URL своего сайта на <a href="https://metatags.io" target="_blank">metatags.io</a> — увидишь, как ссылка будет выглядеть в Twitter, Facebook, Slack и других местах. Если выглядит уныло — есть что чинить.</div>
+    `,
+    items: [
+      { id: "seo-1", label: "У /promo есть понятный заголовок страницы (title)", required: true, hint: "То, что показывается во вкладке браузера. До 60 символов." },
+      { id: "seo-2", label: "У /promo есть короткое описание (meta description)", required: true, hint: "До 160 символов. Это то, что Google показывает под ссылкой в выдаче." },
+      { id: "seo-3", label: "Настроены теги для красивого превью при шеринге", required: true, hint: "Open Graph: og:title, og:description, og:image" },
+      { id: "seo-4", label: "Настроены теги для Twitter — чтобы там тоже было превью" },
+      { id: "seo-5", label: "Иконка сайта (favicon) есть — её видно во вкладке" },
+      { id: "seo-6", label: "Есть файл /robots.txt", hint: "Говорит поисковикам что индексировать, а /api трогать не надо" },
+      { id: "seo-7", label: "Есть файл /sitemap.xml", hint: "Список всех публичных страниц для поисковиков" },
+      { id: "seo-8", label: "Lighthouse SEO ≥ 95" },
+      { id: "seo-9", label: "Проверил(а) превью ссылки на metatags.io — выглядит хорошо" },
+    ]
+  },
+  {
+    id: "perf",
+    title: "Скорость загрузки",
+    subtitle: "С медленных сайтов уходят за 3 секунды.",
+    text: `
+      <p>Если сайт грузится дольше 3 секунд — половина людей уйдёт ещё до того, как увидит, что там. Google это знает и понижает медленные сайты в выдаче.</p>
+      <p>Google измеряет <strong>три главные метрики</strong> (они называются Core Web Vitals — «основные показатели жизнеспособности»):</p>
+      <ul>
+        <li><strong>LCP</strong> — за сколько секунд появляется главное содержимое (большая картинка, заголовок). <strong>Цель: до 2.5 секунд.</strong></li>
+        <li><strong>CLS</strong> — насколько контент прыгает во время загрузки. <strong>Цель: почти не прыгает.</strong></li>
+        <li><strong>INP</strong> — насколько быстро сайт реагирует на клики. <strong>Цель: до 200 миллисекунд.</strong></li>
+      </ul>
+      <p>Открой <strong>Lighthouse в Chrome DevTools → выбери «Performance» → Mobile → Analyze</strong>. Получишь оценку и список, что улучшить.</p>
+      <div class="designer-note"><strong>Простые победы:</strong><br>
+      • Все картинки через <code class="inline">next/image</code> — он сам их сжимает<br>
+      • Шрифты через <code class="inline">next/font</code> — не будет «мерцания» текста при загрузке<br>
+      • Тяжёлые компоненты ниже первого экрана через <code class="inline">dynamic()</code> — грузятся отдельно</div>
+    `,
+    items: [
+      { id: "perf-1", label: "Lighthouse поставил Performance 90+ на /promo (мобильный режим)", required: true },
+      { id: "perf-2", label: "Главное содержимое появляется быстрее 2.5 секунд (LCP)", required: true },
+      { id: "perf-3", label: "Контент почти не прыгает при загрузке (CLS)", required: true },
+      { id: "perf-4", label: "Сайт реагирует на клики быстрее 200мс (INP)" },
+      { id: "perf-5", label: "Все картинки подключены через next/image" },
+      { id: "perf-6", label: "Шрифты подключены через next/font", hint: "Чтобы не было скачка и мерцания текста при загрузке" },
+      { id: "perf-7", label: "Глянул(а) размер бандла после билда — нет ничего огромного", hint: "В выводе npm run build есть столбец «First Load JS»" },
+    ]
+  },
+  {
+    id: "smoke",
+    title: "Финальная проверка дома",
+    subtitle: "Перед тем как заливать в интернет — потестируем у себя.",
+    text: `
+      <p>Запусти сайт у себя на компе и пройди весь путь как обычный пользователь. <strong>Не как разработчик</strong>, который знает где какая кнопка — а как новый человек, который сайт видит впервые.</p>
+      <p><strong>Важно:</strong> запускай не <code class="inline">npm run dev</code> (он для разработки), а продакшен-сборку — ту самую, которая будет в интернете:</p>
+      <p><code class="inline">npm run build && npm start</code></p>
+      <div class="danger-note"><strong>Пробуй не только «всё идёт по плану»:</strong> введи неправильный имейл, нажми «назад» в середине регистрации, обнови страницу когда что-то грузится, выйди и зайди другим аккаунтом. Баги прячутся именно тут.</div>
+    `,
+    items: [
+      { id: "smk-1", label: "npm run build прошёл без ошибок", required: true },
+      { id: "smk-2", label: "Все тесты зелёные", required: true, hint: "npm test" },
+      { id: "smk-3", label: "Проверка типов прошла", required: true, hint: "npx tsc --noEmit" },
+      { id: "smk-4", label: "Захожу не залогиненный — попадаю на /promo", required: true },
+      { id: "smk-5", label: "Кликнул(а) «Get started» — попал(а) на страницу входа" },
+      { id: "smk-6", label: "Ввёл(а) имейл — пришло письмо со ссылкой для входа" },
+      { id: "smk-7", label: "Кликнул(а) по ссылке из письма — зашёл(ла) в аккаунт" },
+      { id: "smk-8", label: "Создал(а) новый отклик на вакансию — сохранился" },
+      { id: "smk-9", label: "Перетащил(а) отклик в другой статус — изменение сохранилось" },
+      { id: "smk-10", label: "Удалил(а) отклик — пропал" },
+      { id: "smk-11", label: "Нажал(а) «Выйти» — выкинуло на страницу входа" },
+      { id: "smk-12", label: "В консоли браузера (F12 → Console) нет красных ошибок" },
+    ]
+  },
+  {
+    id: "vercel",
+    title: "Заливаем сайт в интернет (Vercel)",
+    subtitle: "Vercel сам соберёт код с GitHub и сделает его доступным по адресу.",
+    text: `
+      <p>Vercel — это сервис, который берёт твой код с GitHub, собирает его и выкладывает в интернет по адресу типа <code class="inline">landed.vercel.app</code>. Один раз настроил — и каждый <code class="inline">git push</code> автоматически обновляет сайт.</p>
+      <p>Главное, что надо настроить — <strong>переменные окружения</strong> (env vars). Это секретные ключи, которые твой код использует, чтобы подключиться к Supabase и OpenAI.</p>
+      <p>На твоём компе они лежат в файле <code class="inline">.env.local</code>, а на Vercel их надо добавить вручную через настройки проекта: <strong>Vercel → Settings → Environment Variables</strong>.</p>
+      <div class="danger-note"><strong>Важно:</strong> НЕ ставь префикс <code class="inline">NEXT_PUBLIC_</code> на серверные секреты (типа OpenAI). Всё с этим префиксом отправляется в браузер — а значит, любой человек сможет посмотреть твой ключ через DevTools.</div>
+    `,
+    items: [
+      { id: "vc-1", label: "Все изменения залиты в GitHub (git push)", required: true },
+      { id: "vc-2", label: "Зашёл(ла) на vercel.com и подключил(а) свой GitHub-репозиторий", required: true },
+      { id: "vc-3", label: "В настройках Vercel добавил(а) NEXT_PUBLIC_SUPABASE_URL", required: true },
+      { id: "vc-4", label: "Добавил(а) NEXT_PUBLIC_SUPABASE_ANON_KEY", required: true },
+      { id: "vc-5", label: "Добавил(а) OPENAI_API_KEY (новый ключ после ротации)", required: true },
+      { id: "vc-6", label: "Все три галочки в каждой переменной: Production, Preview, Development", hint: "Иначе сайт сломается на одной из сред" },
+      { id: "vc-7", label: "Первый билд на Vercel прошёл — в логах нет красных ошибок", required: true },
+      { id: "vc-8", label: "Скопировал(а) production URL", hint: "Нужен на следующем шаге для Supabase" },
+      { id: "vc-9", label: "Подключил(а) свой домен (если есть)", hint: "Если нет — пока остаётся vercel.app адрес" },
+    ]
+  },
+  {
+    id: "supabase",
+    title: "Говорим Supabase про новый адрес",
+    subtitle: "Без этого вход на сайт не будет работать.",
+    text: `
+      <p>Supabase — это где живёт твоя база данных и где обрабатывается вход пользователей. Когда сайт переехал с localhost на новый адрес в интернете — Supabase надо об этом сказать.</p>
+      <p>Иначе письма со ссылками для входа (magic links) будут уходить с адресом <code class="inline">localhost:3009</code>, а такой адрес у пользователей не работает. Они кликнут — попадут в никуда.</p>
+      <p>Открой <strong>панель Supabase → Authentication → URL Configuration</strong>. Там два важных поля:</p>
+      <ul>
+        <li><strong>Site URL</strong> — твой основной адрес в интернете. Именно его подставят в письма.</li>
+        <li><strong>Redirect URLs (allow list)</strong> — список всех адресов, на которые Supabase разрешено возвращать пользователя после входа. Если адрес не в списке — Supabase скажет «нельзя».</li>
+      </ul>
+      <div class="designer-note"><strong>Лайфхак:</strong> используй звёздочку для preview-деплоев. Vercel создаёт новый URL для каждой ветки — звёздочка <code class="inline">https://*.vercel.app/auth/callback</code> разрешит их все сразу.</div>
+    `,
+    items: [
+      { id: "sb-1", label: "Site URL = production URL", required: true, hint: "Например, https://landed.vercel.app или твой домен" },
+      { id: "sb-2", label: "В allow list добавил(а): твой-URL/auth/callback", required: true },
+      { id: "sb-3", label: "В allow list добавил(а): https://*.vercel.app/auth/callback", required: true, hint: "Чтобы работали preview-деплои" },
+      { id: "sb-4", label: "В allow list оставил(а): http://localhost:3009/auth/callback", hint: "Чтобы локальная разработка тоже работала" },
+      { id: "sb-5", label: "В шаблонах писем нет хардкода localhost", required: true, hint: "Должно быть {{ .SiteURL }} — Supabase подставит сам" },
+      { id: "sb-6", label: "Прошёл(ла) по каждой таблице и проверил(а) RLS-политики", required: true },
+      { id: "sb-7", label: "Понимаю, что бесплатный Supabase засыпает после 7 дней", hint: "Либо платный тариф, либо просто помни об этом" },
+      { id: "sb-8", label: "Включил(а) ежедневные бэкапы базы (если на платном тарифе)" },
+    ]
+  },
+  {
+    id: "verify",
+    title: "Проверка после релиза",
+    subtitle: "Убедись, что в проде всё реально работает.",
+    text: `
+      <p>Открой свой сайт в <strong>режиме инкогнито</strong> (Cmd+Shift+N в Chrome). Так браузер не подставит твои старые куки, и ты увидишь сайт как новый пользователь.</p>
+      <p>Пройди весь путь снова — но уже на реальном URL. Зарегистрируйся, залогинься, создай отклик, удали, выйди. Если где-то спотыкаешься — фикси.</p>
+      <p>Это момент поймать баги, которые «у меня же на компе работало»: забытая переменная окружения, неправильный redirect URL и т.д.</p>
+      <div class="danger-note"><strong>Если что-то сломалось — не паникуй и не патч в спешке.</strong> В Vercel есть откат в один клик: Deployments → возьми предыдущий деплой → «Promote to Production». Откатил — потом спокойно чинишь на ветке.</div>
+    `,
+    items: [
+      { id: "vf-1", label: "Открыл(а) production URL в инкогнито — попал(а) на /promo", required: true },
+      { id: "vf-2", label: "Кликнул(а) «Get started» — оказался(ась) на /sign-in", required: true },
+      { id: "vf-3", label: "Magic link пришёл на почту", required: true },
+      { id: "vf-4", label: "Ссылка в письме ведёт на production URL, а НЕ на localhost", required: true },
+      { id: "vf-5", label: "Кликнул(а) по ссылке — попал(а) на дашборд", required: true },
+      { id: "vf-6", label: "Создал(а) отклик — он сохранился и виден после перезагрузки" },
+      { id: "vf-7", label: "Нажал(а) «Выйти» — вернулся(ась) на /sign-in" },
+      { id: "vf-8", label: "В DevTools → Console нет красных ошибок" },
+      { id: "vf-9", label: "В DevTools → Network нет 404 и 500 запросов" },
+      { id: "vf-10", label: "Открыл(а) на телефоне (или DevTools → Toggle device toolbar) — вёрстка не разъехалась" },
+    ]
+  },
+  {
+    id: "monitor",
+    title: "Мониторинг и откат",
+    subtitle: "Узнавай о проблемах раньше, чем тебе напишут пользователи.",
+    text: `
+      <p>Сайт в интернете. Теперь нужно знать, если что-то сломалось — но не из писем «у вас всё лежит», а самому.</p>
+      <p>Настрой это <strong>до того</strong>, как расскажешь людям про Landed — а не после первого баг-репорта.</p>
+      <p><strong>Минимальный набор инструментов</strong> (всё бесплатно):</p>
+      <ul>
+        <li><strong>Vercel Analytics</strong> — кто заходит, сколько секунд грузится. Один тогл в дашборде Vercel.</li>
+        <li><strong>Vercel Logs</strong> — если в API упала ошибка, она тут. Уже включены, просто заглядывай раз в день первую неделю.</li>
+        <li><strong>UptimeRobot</strong> — пингует твой сайт каждые 5 минут и пишет, если упал. Бесплатно навсегда.</li>
+        <li><strong>Sentry (по желанию)</strong> — если хочешь видеть подробности ошибок со стектрейсами. Бесплатного тарифа хватит на старт.</li>
+      </ul>
+      <div class="designer-note"><strong>Самое важное — знай, как откатить.</strong> В Vercel это один клик: Deployments → возьми предыдущий рабочий деплой → «Promote to Production». Без git, без терминала. Это твоя кнопка «вернуть как было».</div>
+    `,
+    items: [
+      { id: "mon-1", label: "Включил(а) Vercel Analytics", required: true, hint: "Vercel → твой проект → вкладка Analytics → Enable" },
+      { id: "mon-2", label: "Заглянул(а) в Vercel Logs — знаю, где они", required: true },
+      { id: "mon-3", label: "Знаю, как сделать откат в Vercel", required: true, hint: "Deployments → предыдущий деплой → Promote to Production" },
+      { id: "mon-4", label: "Знаю, как разбудить Supabase, если он уснёт", hint: "Зайти в дашборд и нажать Restore" },
+      { id: "mon-5", label: "Поставил(а) бесплатный uptime-мониторинг (UptimeRobot)" },
+      { id: "mon-6", label: "Подключил(а) трекер ошибок (Sentry / Highlight)" },
+      { id: "mon-7", label: "Поставил(а) напоминание заглянуть в логи через 24 часа и через неделю" },
+    ]
+  },
+];
+
+const lessonList = document.getElementById("lessonList");
+const topTitle = document.getElementById("topTitle");
+const progressEl = document.getElementById("progress");
+const lessonText = document.getElementById("lessonText");
+const workspace = document.getElementById("workspace");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+function stepDone(step) {
+  return step.items.filter(i => i.required).every(i => state.checked[i.id]);
+}
+
+function renderSidebar() {
+  lessonList.innerHTML = "";
+  STEPS.forEach((step, i) => {
+    const li = document.createElement("li");
+    li.className = "lesson-item" + (i === state.current ? " active" : "") + (stepDone(step) ? " done" : "");
+    li.innerHTML = `<span class="lesson-num">${String(i + 1).padStart(2, "0")}</span><span>${step.title}</span>`;
+    li.addEventListener("click", () => { state.current = i; save(); render(); });
+    lessonList.appendChild(li);
+  });
+}
+
+function renderTop() {
+  const total = STEPS.reduce((n, s) => n + s.items.length, 0);
+  const done = STEPS.reduce((n, s) => n + s.items.filter(i => state.checked[i.id]).length, 0);
+  topTitle.textContent = STEPS[state.current].title;
+  progressEl.textContent = `сделано ${done} / ${total}`;
+}
+
+function renderLesson() {
+  const step = STEPS[state.current];
+  lessonText.innerHTML = `
+    <h3>${step.title}</h3>
+    <p class="subtitle">${step.subtitle}</p>
+    ${step.text}
+  `;
+}
+
+function renderWorkspace() {
+  const step = STEPS[state.current];
+  const doneCount = step.items.filter(i => state.checked[i.id]).length;
+  const reqDoneCount = step.items.filter(i => i.required && state.checked[i.id]).length;
+  const reqTotal = step.items.filter(i => i.required).length;
+  const pct = Math.round((doneCount / step.items.length) * 100);
+
+  workspace.innerHTML = `
+    <div class="panel-label">
+      <span>Чеклист шага ${state.current + 1}</span>
+      <span class="saved-indicator">сохранено</span>
+    </div>
+    <div class="panel">
+      <div id="checks"></div>
+      <div class="step-progress">
+        <span>${doneCount}/${step.items.length}</span>
+        <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span>${reqDoneCount}/${reqTotal} обязательных</span>
+      </div>
+    </div>
+  `;
+
+  const checks = workspace.querySelector("#checks");
+  step.items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "check-item" + (state.checked[item.id] ? " done" : "");
+    const tag = item.required
+      ? `<span class="tag required">обязательно</span>`
+      : `<span class="tag optional">по желанию</span>`;
+    row.innerHTML = `
+      <input type="checkbox" id="${item.id}" ${state.checked[item.id] ? "checked" : ""} />
+      <label for="${item.id}">${item.label}${tag}${item.hint ? `<span class="hint">${item.hint}</span>` : ""}</label>
+    `;
+    row.querySelector("input").addEventListener("change", (e) => {
+      if (e.target.checked) state.checked[item.id] = true;
+      else delete state.checked[item.id];
+      save();
+      flashSaved();
+      renderSidebar();
+      renderTop();
+      renderWorkspace();
+    });
+    checks.appendChild(row);
+  });
+}
+
+function flashSaved() {
+  document.querySelectorAll(".saved-indicator").forEach(el => {
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 800);
+  });
+}
+
+function render() {
+  renderSidebar();
+  renderTop();
+  renderLesson();
+  renderWorkspace();
+  prevBtn.disabled = state.current === 0;
+  nextBtn.disabled = state.current === STEPS.length - 1;
+}
+
+prevBtn.addEventListener("click", () => { if (state.current > 0) { state.current--; save(); render(); window.scrollTo(0, 0); } });
+nextBtn.addEventListener("click", () => { if (state.current < STEPS.length - 1) { state.current++; save(); render(); window.scrollTo(0, 0); } });
+resetBtn.addEventListener("click", () => {
+  if (!confirm("Сбросить все галочки? Действие нельзя отменить.")) return;
+  state.checked = {};
+  state.current = 0;
+  save();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

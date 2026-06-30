@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Как запустить проект Landed — пошаговая инструкция</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --card-2: #1d212a;
+    --text: #e7e9ee;
+    --muted: #9aa3b2;
+    --accent: #7c9cff;
+    --accent-soft: #2a3350;
+    --green: #56d364;
+    --yellow: #e3b341;
+    --red: #f47067;
+    --border: #2a2f3a;
+    --code-bg: #0b0d11;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 17px;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 48px 24px 120px; }
+
+  header.hero {
+    text-align: center;
+    padding: 32px 0 8px;
+  }
+  header.hero .badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: 38px; line-height: 1.15; margin: 0 0 14px; letter-spacing: -0.02em; }
+  .subtitle { color: var(--muted); font-size: 19px; max-width: 600px; margin: 0 auto; }
+
+  h2 {
+    font-size: 26px;
+    margin: 56px 0 18px;
+    letter-spacing: -0.01em;
+    scroll-margin-top: 24px;
+  }
+  h3 { font-size: 20px; margin: 32px 0 10px; }
+
+  /* Step number chips */
+  .step-head { display: flex; align-items: center; gap: 14px; }
+  .step-num {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #0b0d11;
+    font-weight: 800;
+    font-size: 20px;
+    display: grid; place-items: center;
+  }
+
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 26px;
+    margin: 20px 0;
+  }
+
+  /* Callouts */
+  .note, .tip, .warn {
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 18px 0;
+    border-left: 4px solid;
+    font-size: 16px;
+  }
+  .note { background: #16202e; border-color: var(--accent); }
+  .tip  { background: #14241a; border-color: var(--green); }
+  .warn { background: #2a1d16; border-color: var(--yellow); }
+  .note b, .tip b, .warn b { color: var(--text); }
+  .callout-label { font-weight: 700; margin-right: 6px; }
+
+  /* Code */
+  code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14.5px;
+    color: #d2e0ff;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 14px 0;
+  }
+  pre code { background: none; border: none; padding: 0; color: #cfe0ff; }
+  .term-comment { color: var(--muted); }
+
+  ul, ol { padding-left: 22px; }
+  li { margin: 7px 0; }
+
+  /* Table of contents */
+  nav.toc {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 32px 0;
+  }
+  nav.toc h4 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  nav.toc ol { margin: 0; padding-left: 20px; }
+  nav.toc a { text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  .divider { height: 1px; background: var(--border); margin: 48px 0; border: none; }
+
+  kbd {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 13.5px;
+  }
+
+  /* Glossary terms */
+  .term-card { display: flex; gap: 16px; align-items: flex-start; }
+  .term-icon { font-size: 28px; flex: 0 0 auto; }
+
+  footer { text-align: center; color: var(--muted); font-size: 14px; margin-top: 60px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="badge">Гайд для студентов</span>
+    <h1>Как скачать и запустить проект <br>на своём компьютере</h1>
+    <p class="subtitle">Пошагово и простым языком: от установки Cursor до запуска готового приложения в браузере. Предварительных знаний не требуется.</p>
+  </header>
+
+  <nav class="toc">
+    <h4>Что внутри</h4>
+    <ol>
+      <li><a href="#what">Что мы вообще будем делать</a></li>
+      <li><a href="#cursor">Шаг 1. Устанавливаем Cursor</a></li>
+      <li><a href="#node">Шаг 2. Устанавливаем Node.js</a></li>
+      <li><a href="#download">Шаг 3. Скачиваем репозиторий (ZIP)</a></li>
+      <li><a href="#unzip">Шаг 4. Распаковываем папку</a></li>
+      <li><a href="#open">Шаг 5. Открываем проект в Cursor</a></li>
+      <li><a href="#install">Шаг 6. Устанавливаем зависимости</a></li>
+      <li><a href="#supabase">Шаг 7. Создаём базу данных в Supabase</a></li>
+      <li><a href="#openai">Шаг 8. Получаем ключ OpenAI (для ИИ-чата)</a></li>
+      <li><a href="#env">Шаг 9. Добавляем секретные ключи (.env.local)</a></li>
+      <li><a href="#run">Шаг 10. Запускаем локальный сервер</a></li>
+      <li><a href="#glossary">Словарик: что это за страшные слова</a></li>
+      <li><a href="#troubleshoot">Если что-то пошло не так</a></li>
+    </ol>
+  </nav>
+
+  <!-- WHAT -->
+  <h2 id="what">Что мы вообще будем делать</h2>
+  <div class="card">
+    <p>Представь, что кто-то приготовил блюдо и записал рецепт. <b>Проект</b> — это и есть «рецепт» приложения: набор файлов с кодом. Сам по себе он не работает — его нужно «приготовить» на своём компьютере.</p>
+    <p>Наш план простой:</p>
+    <ol>
+      <li>Поставить <b>Cursor</b> — это программа-«кухня», в которой мы открываем код.</li>
+      <li>Поставить <b>Node.js</b> — это «плита», без которой код не запустится.</li>
+      <li>Скачать сам проект и распаковать его.</li>
+      <li>Запустить его — и приложение откроется прямо в твоём браузере.</li>
+    </ol>
+    <p>Идём по порядку и ничего не пропускаем. Каждый шаг занимает пару минут.</p>
+  </div>
+
+  <!-- STEP 1: CURSOR -->
+  <h2 id="cursor"><span class="step-head"><span class="step-num">1</span> Устанавливаем Cursor</span></h2>
+  <p><b>Cursor</b> — это редактор кода со встроенным ИИ-помощником. По сути это программа, где мы будем смотреть и менять файлы проекта, а ещё запускать его.</p>
+  <ol>
+    <li>Зайди на сайт <a href="https://cursor.com" target="_blank" rel="noopener">cursor.com</a>.</li>
+    <li>Нажми большую кнопку <b>Download</b> — сайт сам поймёт, какая у тебя система (Mac или Windows).</li>
+    <li>Открой скачанный файл и установи программу, как любое другое приложение:
+      <ul>
+        <li><b>Mac:</b> перетащи иконку Cursor в папку <code>Applications</code>.</li>
+        <li><b>Windows:</b> запусти установщик <code>.exe</code> и жми «Далее» до конца.</li>
+      </ul>
+    </li>
+    <li>Запусти Cursor. При первом запуске он спросит про вход и настройки — можно везде нажимать «Continue» / «Skip», для нас сейчас это не важно.</li>
+  </ol>
+  <div class="tip"><span class="callout-label">💡 Подсказка:</span> Cursor сделан на основе очень популярного редактора VS Code, поэтому почти всё в нём выглядит и работает так же.</div>
+
+  <!-- STEP 2: NODE -->
+  <h2 id="node"><span class="step-head"><span class="step-num">2</span> Устанавливаем Node.js</span></h2>
+  <p>Наш проект написан на JavaScript. Чтобы компьютер умел его «готовить», нужна <b>Node.js</b> — это та самая «плита», которая запускает код. Вместе с ней автоматически ставится <code>npm</code> — помощник, который скачивает все нужные проекту детали.</p>
+
+  <div class="tip"><span class="callout-label">💡 Самый простой способ — попросить ИИ в Cursor.</span> Открой чат Cursor (значок чата справа или <kbd>Cmd/Ctrl</kbd> + <kbd>L</kbd>) и напиши прямо человеческими словами:
+    <pre><code>Установи мне Node.js LTS на этот компьютер и проверь, что node и npm работают</code></pre>
+    Cursor сам предложит команды и выполнит их за тебя — просто соглашайся (Run / Accept), когда он спрашивает. Это удобнее, чем ставить вручную.</div>
+
+  <h3>Способ вручную (если хочешь сделать сам)</h3>
+  <p><b>Вариант А — скачать с сайта (самый понятный):</b></p>
+  <ol>
+    <li>Зайди на <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>.</li>
+    <li>Скачай версию с пометкой <b>LTS</b> (это «стабильная, проверенная» версия — то, что нам нужно).</li>
+    <li>Открой скачанный файл и установи, нажимая «Далее» / «Continue» до конца.</li>
+  </ol>
+  <p><b>Вариант Б — одной командой в терминале Cursor</b> (терминал открывается так: <b>Terminal → New Terminal</b>):</p>
+  <ul>
+    <li><b>Mac:</b> <code>brew install node</code> &nbsp;<span class="term-comment">(если установлен Homebrew)</span></li>
+    <li><b>Windows:</b> <code>winget install OpenJS.NodeJS.LTS</code></li>
+  </ul>
+
+  <p><b>Проверка, что всё получилось.</b> Открой в Cursor терминал и набери:</p>
+  <pre><code>node --version</code></pre>
+  <p>Если в ответ появилось что-то вроде <code>v20.11.0</code> — отлично, Node.js на месте.</p>
+  <div class="note"><span class="callout-label">ℹ️ Что такое терминал?</span> Это окошко, куда команды печатают текстом, а не мышкой. Все команды из этой инструкции можно просто копировать и вставлять.</div>
+
+  <!-- STEP 3: DOWNLOAD -->
+  <h2 id="download"><span class="step-head"><span class="step-num">3</span> Скачиваем репозиторий</span></h2>
+  <p><b>Репозиторий</b> (или просто «репо») — это папка с проектом, которая лежит в интернете, обычно на сайте <b>GitHub</b>. Наша задача — скачать её копию к себе.</p>
+  <div class="note"><span class="callout-label">🔗 Ссылка на проект:</span> <a href="https://github.com/DashaDzisko/landedtool" target="_blank" rel="noopener">github.com/DashaDzisko/landedtool</a></div>
+  <ol>
+    <li>Открой ссылку на репозиторий выше.</li>
+    <li>Найди зелёную кнопку <b>&lt;&gt; Code</b> вверху справа.</li>
+    <li>В выпавшем меню нажми <b>Download ZIP</b>.</li>
+    <li>Файл-архив <code>.zip</code> скачается в твою папку <b>Загрузки / Downloads</b>.</li>
+  </ol>
+  <div class="note"><span class="callout-label">ℹ️ Что такое ZIP?</span> Это «сжатая» папка — много файлов, упакованных в один, чтобы их было удобно передавать. Перед использованием её нужно «распаковать» (распаковать = unzip).</div>
+
+  <!-- STEP 4: UNZIP -->
+  <h2 id="unzip"><span class="step-head"><span class="step-num">4</span> Распаковываем папку</span></h2>
+  <ul>
+    <li><b>Mac:</b> просто дважды кликни по файлу <code>.zip</code> — рядом появится обычная папка.</li>
+    <li><b>Windows:</b> кликни по файлу правой кнопкой → <b>Извлечь всё / Extract All</b> → <b>Извлечь</b>.</li>
+  </ul>
+  <div class="tip"><span class="callout-label">💡 Совет:</span> перенеси распакованную папку в удобное место, например на <b>Рабочий стол</b>, чтобы её было легко найти. И запомни путь к ней — он скоро понадобится.</div>
+
+  <!-- STEP 5: OPEN -->
+  <h2 id="open"><span class="step-head"><span class="step-num">5</span> Открываем проект в Cursor</span></h2>
+  <ol>
+    <li>Открой Cursor.</li>
+    <li>В верхнем меню выбери <b>File → Open Folder…</b> (Файл → Открыть папку).</li>
+    <li>Найди распакованную папку проекта и нажми <b>Open</b>.</li>
+    <li>Если Cursor спросит «Do you trust the authors?» («Доверяешь авторам?») — нажми <b>Yes, I trust</b>.</li>
+  </ol>
+  <p>Слева появится список файлов проекта. Это и есть «рецепт». Файлов много, но напрямую нам понадобятся всего пара из них.</p>
+
+  <!-- STEP 6: INSTALL -->
+  <h2 id="install"><span class="step-head"><span class="step-num">6</span> Устанавливаем зависимости</span></h2>
+  <p><b>Зависимости</b> — это готовые детали (чужой код), которые проект использует, чтобы не писать всё с нуля. Их нужно скачать один раз.</p>
+  <p>Сначала открой <b>терминал прямо внутри Cursor</b>:</p>
+  <ul>
+    <li>В верхнем меню: <b>Terminal → New Terminal</b> (Терминал → Новый терминал).</li>
+    <li>Или нажми <kbd>Ctrl</kbd> + <kbd>`</kbd> (значок слева от цифры 1).</li>
+  </ul>
+  <p>Внизу откроется то самое «чёрное окошко». Важно: оно уже открыто <b>внутри папки проекта</b>, так что просто впиши команду и нажми <kbd>Enter</kbd>:</p>
+  <pre><code>npm install</code></pre>
+  <p>Пойдёт скачивание — это может занять 1–3 минуты. Появится много текста, иногда жёлтые предупреждения (warnings) — это нормально, их можно игнорировать. Когда снова появится мигающий курсор и можно печатать — значит, готово.</p>
+  <div class="note"><span class="callout-label">ℹ️</span> После этой команды в проекте появится папка <code>node_modules</code> — там и лежат все скачанные детали. Её не нужно открывать или трогать.</div>
+
+  <!-- STEP 7: SUPABASE -->
+  <h2 id="supabase"><span class="step-head"><span class="step-num">7</span> Создаём базу данных в Supabase</span></h2>
+
+  <div class="note"><span class="callout-label">ℹ️ У каждого будет своя база.</span> Ты создашь <b>свой собственный</b> проект Supabase, поэтому твои <code>URL</code> и <code>ключ</code> будут уникальными — не такими, как у других студентов. Это нормально: на этом шаге как раз и нужно получить <b>свои</b> значения и вписать их в <code>.env.local</code> (шаг 9).</div>
+
+  <p>Сейчас у нас есть код приложения, но <b>данные ему пока негде хранить</b>. Создадим бесплатную базу данных в Supabase и зальём в неё нашу «схему» — таблицы для заявок, чатов, профилей. Все нужные SQL-файлы уже лежат в проекте, в папке <code>supabase/migrations</code> — нам останется их просто скопировать и запустить.</p>
+
+  <h3>7.1. Регистрируемся и создаём проект</h3>
+  <ol>
+    <li>Зайди на <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> и нажми <b>Start your project</b>. Войти проще всего через свой аккаунт GitHub.</li>
+    <li>Нажми <b>New project</b> (Новый проект).</li>
+    <li>Заполни:
+      <ul>
+        <li><b>Name</b> — любое имя, например <code>landed</code>.</li>
+        <li><b>Database Password</b> — придумай пароль для базы. <b>Запиши его</b> где-нибудь — он ещё может пригодиться.</li>
+        <li><b>Region</b> — выбери регион поближе к себе (например Europe).</li>
+      </ul>
+    </li>
+    <li>Нажми <b>Create new project</b> и подожди 1–2 минуты, пока Supabase всё подготовит.</li>
+  </ol>
+
+  <h3>7.2. Запускаем SQL-файлы (создаём таблицы)</h3>
+  <p>В нашем проекте в папке <code>supabase/migrations</code> лежат <b>три файла</b>, и их нужно запустить <b>строго по порядку</b>:</p>
+  <ol>
+    <li><code>0001_init.sql</code> — создаёт сами таблицы (заявки, чаты, профили).</li>
+    <li><code>0002_rls.sql</code> — включает защиту: каждый пользователь видит только свои данные.</li>
+    <li><code>0003_storage.sql</code> — место для хранения файлов (загруженные CV).</li>
+  </ol>
+  <p>Для каждого файла по очереди делаем одно и то же:</p>
+  <ol>
+    <li>В Supabase слева открой раздел <b>SQL Editor</b> (иконка с надписью SQL).</li>
+    <li>Нажми <b>+ New query</b> (Новый запрос).</li>
+    <li>В Cursor открой файл <code>supabase/migrations/0001_init.sql</code>, выдели весь текст (<kbd>Cmd/Ctrl</kbd> + <kbd>A</kbd>) и скопируй (<kbd>Cmd/Ctrl</kbd> + <kbd>C</kbd>).</li>
+    <li>Вставь его в окно SQL Editor в Supabase и нажми <b>Run</b> (или <kbd>Cmd/Ctrl</kbd> + <kbd>Enter</kbd>).</li>
+    <li>Внизу должно появиться зелёное <b>Success</b>. Готово — повтори то же самое для <code>0002_rls.sql</code>, а затем для <code>0003_storage.sql</code>.</li>
+  </ol>
+  <div class="warn"><span class="callout-label">⚠️ Важно:</span> порядок имеет значение — сначала 0001, потом 0002, потом 0003. Если запустить не по порядку, будут ошибки, потому что второй файл опирается на таблицы из первого.</div>
+
+  <h3>7.3. Забираем «адрес» и «ключ» базы</h3>
+  <p>Теперь нужно сказать нашему приложению, где живёт база. Эти два значения мы позже впишем в файл <code>.env.local</code> (шаг 9).</p>
+  <p>На главной странице проекта в Supabase вверху есть кнопка <b>Connect</b> (рядом с названием проекта). Нажми её — откроется выпадающее меню, и там сразу всё нужное:</p>
+  <ol>
+    <li><b>Project URL</b> — это <code>NEXT_PUBLIC_SUPABASE_URL</code> (выглядит как <code>https://что-то.supabase.co</code>). Нажми <b>Copy</b> рядом.</li>
+    <li><b>Publishable key</b> — это <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> (начинается с <code>sb_publishable_…</code>). Тоже скопируй.</li>
+    <li>Сохрани оба значения в заметке — пригодятся через пару шагов.</li>
+  </ol>
+  <div class="note"><span class="callout-label">ℹ️ В этом же меню есть «Direct connection string» и «CLI setup commands» — их трогать не нужно.</span> Нам хватит двух значений сверху. <b>Publishable key</b> (раньше он назывался «anon key») — публичный, он специально попадает в браузер, и это нормально. Реальную защиту данных делает «RLS» из файла <code>0002_rls.sql</code>: даже с этим ключом человек видит только свои записи. А вот <b>secret / service_role</b> ключ (если встретишь) — секретный, в браузер его выкладывать нельзя.</div>
+  <div class="tip"><span class="callout-label">✅ Не нужно входить в Supabase через терминал.</span> Ты можешь встретить команды вроде <code>supabase login</code> или <code>supabase init</code> (в дропдауне «CLI setup commands»). <b>Нам они не нужны.</b> Ключи начинают работать сами, как только ты впишешь <code>Project URL</code> и <code>Publishable key</code> в файл <code>.env.local</code> (шаг 9). Терминальный вход — это отдельный, более продвинутый способ управлять базой, и для запуска нашего проекта он не требуется.</div>
+
+  <!-- STEP 8: OPENAI -->
+  <h2 id="openai"><span class="step-head"><span class="step-num">8</span> Получаем ключ OpenAI</span></h2>
+  <p>Этот ключ нужен только для <b>ИИ-чата</b> внутри приложения. Если сейчас хочешь просто запустить проект и посмотреть интерфейс — этот шаг можно пропустить и вернуться позже.</p>
+  <ol>
+    <li>Зайди на <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a> и войди (или зарегистрируйся).</li>
+    <li>Нажми <b>Create new secret key</b>, дай ей любое имя.</li>
+    <li>Скопируй ключ <b>сразу</b> — он показывается только один раз. Это значение <code>OPENAI_API_KEY</code>.</li>
+  </ol>
+  <div class="warn"><span class="callout-label">⚠️ Важно:</span> ключ OpenAI — <b>секретный</b> и привязан к деньгам/лимитам аккаунта. Никому его не показывай и не выкладывай в интернет. Скорее всего, его выдаст преподаватель — тогда отдельный аккаунт создавать не нужно.</div>
+
+  <!-- STEP 9: ENV -->
+  <h2 id="env"><span class="step-head"><span class="step-num">9</span> Добавляем секретные ключи</span></h2>
+  <p>Теперь соберём вместе ключи, которые мы получили в шагах 7 и 8. Эти ключи — как пароли, поэтому они не хранятся прямо в коде, а лежат в отдельном секретном файле <code>.env.local</code>.</p>
+  <ol>
+    <li>В списке файлов слева найди файл <code>.env.example</code> — это образец.</li>
+    <li>Создай рядом новый файл с именем <code>.env.local</code> (точка в начале обязательна).</li>
+    <li>Скопируй в него содержимое <code>.env.example</code> и подставь свои настоящие значения:</li>
+  </ol>
+  <pre><code>NEXT_PUBLIC_SUPABASE_URL=https://твой-проект.supabase.co   <span class="term-comment"># Project URL, шаг 7.3</span>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_…             <span class="term-comment"># Publishable key, шаг 7.3</span>
+OPENAI_API_KEY=твой-ключ-openai                          <span class="term-comment"># из шага 8</span></code></pre>
+  <div class="warn"><span class="callout-label">⚠️ Важно:</span> файл <code>.env.local</code> и ключи внутри — секретные. Не выкладывай их в интернет и не отправляй в общий чат. Если хочешь пока запустить проект без ИИ-чата — строку <code>OPENAI_API_KEY</code> можно временно оставить пустой.</div>
+
+  <!-- STEP 10: RUN -->
+  <h2 id="run"><span class="step-head"><span class="step-num">10</span> Запускаем локальный сервер</span></h2>
+  <p>Это финальный шаг! В терминале (там же, где делали <code>npm install</code>) набери:</p>
+  <pre><code>npm run dev</code></pre>
+  <p>Через несколько секунд появится сообщение примерно такое:</p>
+  <pre><code class="term-comment">  ▲ Next.js
+  - Local:   http://localhost:3000
+  ✓ Ready in 2.1s</code></pre>
+  <p>Теперь:</p>
+  <ol>
+    <li>Открой браузер (Chrome, Safari — любой).</li>
+    <li>В адресной строке набери: <code>http://localhost:3000</code></li>
+    <li>Нажми <kbd>Enter</kbd> — приложение откроется.</li>
+  </ol>
+  <div class="tip"><span class="callout-label">💡 Совет:</span> в Cursor можно навести курсор на ссылку <code>http://localhost:3000</code> прямо в терминале, зажать <kbd>Cmd</kbd> (Mac) или <kbd>Ctrl</kbd> (Windows) и кликнуть — браузер откроется сам.</div>
+
+  <h3>Вход в приложение (Supabase попросит авторизоваться)</h3>
+  <p>Важно: это приложение <b>закрыто за входом</b>. Когда ты откроешь <code>localhost:3000</code>, тебя сразу перебросит на страницу <b>Sign in</b> — это нормально, так и задумано. Вход устроен без пароля, по «волшебной ссылке» (magic link) через Supabase:</p>
+  <ol>
+    <li>Введи свой <b>email</b> и нажми отправить ссылку.</li>
+    <li>Появится сообщение «Проверь почту» — открой свой почтовый ящик.</li>
+    <li>Найди письмо от Supabase и нажми ссылку внутри. Тебя автоматически вернёт в приложение уже авторизованным.</li>
+  </ol>
+  <div class="note"><span class="callout-label">ℹ️ Письмо не пришло?</span> Проверь папку «Спам». Учти: на бесплатном Supabase письма иногда приходят с задержкой и есть лимит на их количество в час. Письма со входами видно и в самом Supabase: раздел <b>Authentication → Users</b> (там же появляются все, кто вошёл).</div>
+  <div class="warn"><span class="callout-label">⚠️ Ссылка из письма «уводит не туда» или вход не срабатывает?</span> Значит, Supabase не знает про адрес <code>localhost:3000</code>. Открой в Supabase <b>Authentication → URL Configuration</b> и проверь, что:
+    <ul>
+      <li><b>Site URL</b> = <code>http://localhost:3000</code></li>
+      <li>в <b>Redirect URLs</b> добавлен <code>http://localhost:3000/**</code></li>
+    </ul>
+    У новых проектов это обычно уже стоит по умолчанию — но если вход не работает, проверь здесь в первую очередь.</div>
+  <div class="note"><span class="callout-label">ℹ️ Как остановить сервер?</span> Вернись в терминал и нажми <kbd>Ctrl</kbd> + <kbd>C</kbd>. Чтобы запустить снова — опять <code>npm run dev</code>. Пока сервер работает, это окно терминала должно оставаться открытым.</div>
+
+  <hr class="divider">
+
+  <!-- GLOSSARY -->
+  <h2 id="glossary">Словарик: что это за страшные слова</h2>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">🖥️</div>
+      <div>
+        <h3 style="margin-top:0">Локальный сервер</h3>
+        <p>«Локальный» значит «на твоём компьютере». Обычно сайты живут где-то в интернете на чужих серверах. Когда мы запускаем <code>npm run dev</code>, твой собственный компьютер на время превращается в маленький сервер и показывает сайт <b>только тебе</b> по адресу <code>localhost:3000</code>.</p>
+        <p><code>localhost</code> = «этот самый компьютер». <code>3000</code> = номер «двери» (порта), через которую отдаётся сайт. Никто из интернета его не видит — это твоя личная песочница для разработки.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">📦</div>
+      <div>
+        <h3 style="margin-top:0">Локальное хранилище (Local Storage)</h3>
+        <p>Это маленькая «записная книжка» прямо внутри браузера. Сайт может сохранять туда небольшие данные — например, что ты выбрал тёмную тему или не закрыл какое-то окно. Эти данные хранятся <b>на твоём устройстве, в твоём браузере</b>, и остаются даже после перезагрузки страницы.</p>
+        <p>Важное отличие от базы данных: local storage привязан к одному браузеру на одном компьютере. Откроешь сайт с телефона — там этих данных уже не будет. Для серьёзных данных (аккаунты, заявки) используют базу данных в облаке — например Supabase.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">🗄️</div>
+      <div>
+        <h3 style="margin-top:0">Supabase (база данных в облаке)</h3>
+        <p><b>База данных</b> — это умная таблица в интернете, где хранятся все данные приложения: пользователи, их заявки на работу, заметки и т.д. В отличие от local storage, эти данные живут в облаке и доступны с любого устройства.</p>
+        <p><b>Supabase</b> — это готовый сервис, который даёт нам такую базу данных «под ключ», а ещё умеет:</p>
+        <ul>
+          <li><b>хранить данные</b> (на основе классической базы PostgreSQL);</li>
+          <li><b>заниматься входом в аккаунт</b> — в нашем проекте вход по «магической ссылке»: ты вводишь email, тебе приходит письмо, кликаешь — и ты внутри, без пароля;</li>
+          <li><b>защищать данные</b>, чтобы каждый пользователь видел только своё.</li>
+        </ul>
+        <p>Те самые ключи <code>SUPABASE_URL</code> и <code>SUPABASE_ANON_KEY</code> из шага 7 — это «адрес» и «пропуск» к нашей базе.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">🤖</div>
+      <div>
+        <h3 style="margin-top:0">OpenAI (ИИ-чат)</h3>
+        <p>В приложении есть чат с ИИ-помощником. За «мозги» этого чата отвечает <b>OpenAI</b> — та же компания, что сделала ChatGPT. Ключ <code>OPENAI_API_KEY</code> позволяет нашему приложению обращаться к их ИИ. Этот ключ работает «за кулисами» (на сервере) и никогда не показывается в браузере.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">🔑</div>
+      <div>
+        <h3 style="margin-top:0">API-ключ</h3>
+        <p>Сначала про <b>API</b>. Представь ресторан: ты (приложение) не идёшь сам на кухню, а говоришь заказ <b>официанту</b>, и он приносит блюдо. <b>API</b> — это и есть такой «официант»: способ, которым одна программа просит что-то у другой (например, наше приложение просит данные у Supabase или ответ у ИИ от OpenAI).</p>
+        <p><b>API-ключ</b> — это твой «именной пропуск» к такому сервису. По нему сервис понимает, <i>кто</i> обращается, и считает использование (а иногда и деньги). Именно поэтому ключи <code>OPENAI_API_KEY</code> и ключ Supabase — <b>секретные</b>: если их узнает чужой, он сможет пользоваться сервисом от твоего имени. Поэтому мы и прячем их в файл <code>.env.local</code>, а не пишем прямо в коде.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">📡</div>
+      <div>
+        <h3 style="margin-top:0">GET и POST запросы</h3>
+        <p>Когда приложение общается с сервером через API, оно отправляет <b>запросы</b> (requests). У запроса есть «тип», который говорит, <i>что мы хотим сделать</i>. Два самых частых:</p>
+        <ul>
+          <li><b>GET — «дай посмотреть».</b> Это запрос на <b>получение</b> данных, он ничего не меняет. Например: «покажи список моих заявок на работу». Когда ты просто открываешь страницу в браузере — это GET.</li>
+          <li><b>POST — «прими и сохрани».</b> Это запрос на <b>создание / отправку</b> данных. Например: «сохрани новую заявку» или «отправь это сообщение в чат». POST что-то меняет на сервере.</li>
+        </ul>
+        <p>Простая аналогия с тем же официантом: <b>GET</b> — «принесите, пожалуйста, меню» (только смотрю), <b>POST</b> — «запишите мой заказ» (что-то добавилось). Есть и другие типы (PUT/PATCH — изменить, DELETE — удалить), но для старта достаточно знать эти два.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-card">
+      <div class="term-icon">⚙️</div>
+      <div>
+        <h3 style="margin-top:0">Ещё пара слов на будущее</h3>
+        <ul>
+          <li><b>npm</b> — помощник, который скачивает чужой код (зависимости) и запускает проект командами вроде <code>npm run dev</code>.</li>
+          <li><b>Next.js</b> — «каркас» (фреймворк), на котором построено наше приложение. Он же поднимает локальный сервер.</li>
+          <li><b>Терминал / командная строка</b> — окно, где мы общаемся с компьютером текстовыми командами.</li>
+          <li><b>Браузер</b> — программа для просмотра сайтов (Chrome, Safari, Firefox). Именно в нём мы видим результат.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TROUBLESHOOT -->
+  <h2 id="troubleshoot">Если что-то пошло не так</h2>
+  <div class="card">
+    <h3 style="margin-top:0"><code>command not found: npm</code> или <code>node</code></h3>
+    <p>Node.js не установился или Cursor его пока «не увидел». Вернись к шагу 2, переустанови Node.js, затем <b>полностью закрой и снова открой Cursor</b> и попробуй ещё раз.</p>
+
+    <h3>Порт 3000 занят (<code>port 3000 is already in use</code>)</h3>
+    <p>Значит, сервер уже где-то запущен. Либо открой просто <code>http://localhost:3000</code> в браузере, либо останови старый процесс (<kbd>Ctrl</kbd> + <kbd>C</kbd> в том терминале), либо Next.js сам предложит порт <code>3001</code> — тогда открывай его.</p>
+
+    <h3>Страница белая или ошибка про Supabase / переменные окружения</h3>
+    <p>Чаще всего не заполнен файл <code>.env.local</code> (шаг 9) или в нём опечатка. Проверь, что имя файла именно <code>.env.local</code> (с точкой в начале) и значения скопированы без лишних пробелов. После изменения <code>.env.local</code> нужно остановить сервер (<kbd>Ctrl</kbd>+<kbd>C</kbd>) и запустить заново <code>npm run dev</code>.</p>
+
+    <h3>Команда «висит» и ничего не происходит</h3>
+    <p>Для <code>npm install</code> это нормально — подожди до 2–3 минут. Если завис <code>npm run dev</code>, но в нём написано <code>Ready</code> — всё хорошо, так и должно быть, просто открывай браузер. Сервер «висит» специально: он работает, пока окно открыто.</p>
+
+    <h3>Совсем застрял(а)?</h3>
+    <p>Порядок действий, который выручает в большинстве случаев:</p>
+    <ol>
+      <li><b>Спроси у ИИ-чата.</b> Скопируй <u>весь</u> текст ошибки из терминала и вставь в чат Cursor (<kbd>Cmd/Ctrl</kbd> + <kbd>L</kbd>) — напиши «у меня вот такая ошибка, помоги исправить». Чаще всего он подсказывает, что делать дальше.</li>
+      <li><b>Пересмотри лекцию или эту инструкцию.</b> Вернись к нужному шагу и перечитай — часто ответ уже там.</li>
+      <li><b>Спроси в учебном чате</b> или у преподавателя. Чтобы помогли быстрее — приложи <b>скриншот ошибки</b> и напиши, на каком шаге застрял(а).</li>
+    </ol>
+  </div>
+
+  <footer>
+    Если приложение открылось в браузере — всё получилось, проект запущен.
+  </footer>
+
+</div>
+</body>
+</html>
