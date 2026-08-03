@@ -5,7 +5,7 @@ import { Text } from "@/components/atoms/text";
 import { FormField } from "@/components/molecules/form-field";
 import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export interface ProfileFormProps {
   initialName?: string;
@@ -32,11 +32,24 @@ export function ProfileForm({
   const [cv, setCv] = useState(initialCv);
   const [targetRoles, setTargetRoles] = useState(initialTargetRoles);
 
-  useEffect(() => {
+  // Re-sync local fields when the incoming profile changes (e.g. after load).
+  // Adjusting state during render is the recommended alternative to a setState
+  // inside useEffect — see react.dev "You Might Not Need an Effect".
+  const [prevInitial, setPrevInitial] = useState({
+    initialName,
+    initialCv,
+    initialTargetRoles,
+  });
+  if (
+    prevInitial.initialName !== initialName ||
+    prevInitial.initialCv !== initialCv ||
+    prevInitial.initialTargetRoles !== initialTargetRoles
+  ) {
+    setPrevInitial({ initialName, initialCv, initialTargetRoles });
     setName(initialName);
     setCv(initialCv);
     setTargetRoles(initialTargetRoles);
-  }, [initialName, initialCv, initialTargetRoles]);
+  }
 
   if (loading) {
     return (

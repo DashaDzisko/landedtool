@@ -30,7 +30,7 @@ import {
   Trash,
   UploadSimple,
 } from "@phosphor-icons/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 
 function cvFileName(cvUrl?: string) {
   if (!cvUrl) return null;
@@ -107,11 +107,16 @@ export function ApplicationDetail({
     email: "",
   });
 
-  useEffect(() => {
+  // Re-sync local editable state when a different application is opened.
+  // Adjusting state during render avoids a setState-inside-useEffect cascade —
+  // see react.dev "You Might Not Need an Effect".
+  const [prevApplication, setPrevApplication] = useState(application);
+  if (prevApplication !== application) {
+    setPrevApplication(application);
     setNotes(application.noteItems ?? []);
     setContacts(application.contacts ?? []);
     setCvName(cvFileName(application.cvUrl));
-  }, [application]);
+  }
 
   const startEditDesc = () => {
     setDescDraft(application.description ?? "");

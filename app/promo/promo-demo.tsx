@@ -65,6 +65,19 @@ const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const easeInOut = (x: number) =>
   x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
 
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex flex-col gap-0.5 rounded-md bg-surface-3 px-3 py-2">
+      <Text variant="xs" as="span" className="text-ink-subtle">
+        {label}
+      </Text>
+      <span className="text-h2 font-semibold text-foreground">
+        <CountUp value={value} />
+      </span>
+    </div>
+  );
+}
+
 /** Live pipeline snapshot — mirrors the product's ChatStats widget. */
 function DemoStats({ applications }: { applications: Application[] }) {
   const order: ApplicationStatus[] = [
@@ -83,17 +96,6 @@ function DemoStats({ applications }: { applications: Application[] }) {
   ).length;
   const interviews = counts.find((c) => c.status === "interview")?.count ?? 0;
   const offers = counts.find((c) => c.status === "offer")?.count ?? 0;
-
-  const Metric = ({ label, value }: { label: string; value: number }) => (
-    <div className="flex flex-col gap-0.5 rounded-md bg-surface-3 px-3 py-2">
-      <Text variant="xs" as="span" className="text-ink-subtle">
-        {label}
-      </Text>
-      <span className="text-h2 font-semibold text-foreground">
-        <CountUp value={value} />
-      </span>
-    </div>
-  );
 
   return (
     <div className="bento-card flex flex-col gap-3 p-3">
@@ -153,6 +155,9 @@ export function PromoDemo() {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
     ) {
       // Skip the animation — show the finished, landed-in-Offer state.
+      // matchMedia is browser-only, so this can't be a lazy useState initializer
+      // (that would risk an SSR/hydration mismatch); setting it on mount is correct.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBetaStatus("offer");
       setCongrats(true);
       return;
