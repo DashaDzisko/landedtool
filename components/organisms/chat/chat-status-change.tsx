@@ -17,19 +17,27 @@ export interface ChatStatusChangeProps {
 
 /**
  * Agentic action widget — proposes a status move and asks the user to confirm.
- * UI + mock only: confirming shows an acknowledgement. To go live, call
- * `updateApplication(applicationId, { status: toStatus })` on confirm.
+ * Confirming applies the change: it calls `updateApplication`, which updates the
+ * board optimistically and persists to Supabase (rolling back on failure).
  */
 export function ChatStatusChange({
   applicationId,
   toStatus,
 }: ChatStatusChangeProps) {
-  const { applications } = useApplications();
+  const { applications, updateApplication } = useApplications();
   const app = applications.find((a) => a.id === applicationId);
   const [state, setState] = useState<"pending" | "confirmed" | "cancelled">(
     "pending"
   );
   if (!app) return null;
+
+  const confirm = () => {
+    // No-op if it's already in the target status (e.g. widget re-rendered).
+    if (app.status !== toStatus) {
+      updateApplication(applicationId, { status: toStatus });
+    }
+    setState("confirmed");
+  };
 
   return (
     <div className="anim-rise bento-card flex flex-col gap-3 p-4">
@@ -45,7 +53,7 @@ export function ChatStatusChange({
       </div>
       {state === "pending" ? (
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => setState("confirmed")}>
+          <Button size="sm" onClick={confirm}>
             Confirm
           </Button>
           <Button

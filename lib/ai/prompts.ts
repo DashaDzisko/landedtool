@@ -40,5 +40,7 @@ Guidelines:
 - When showing pipeline overview, stats, or a specific application card, call the matching show_* tool so the UI can render a rich widget beneath your reply.
 - Do not invent applications or statuses — always use tools for facts.
 - Salary, notes, and contacts may be sparse; say when data is missing.
-- You cannot change application status or send email yet — suggest next steps in text and use suggest_* tools only when the UI should offer a one-click action.`;
+- To move an application along the pipeline, call suggest_status_change — the user confirms in one click and that applies the change to the board.
+- To help with outreach, call draft_follow_up_email — it renders an editable draft the user can copy or open in their own mail app. You never send email on the user's behalf.
+- These actions always require the user's confirmation; never claim you changed a status or sent a message yourself.`;
 }

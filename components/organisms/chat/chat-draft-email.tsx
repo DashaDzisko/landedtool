@@ -10,7 +10,11 @@ export interface ChatDraftEmailProps {
   body: string;
 }
 
-/** Agentic action widget — an editable draft email with copy / regenerate. */
+/**
+ * Agentic action widget — an editable draft email. The user stays in control:
+ * they can edit, copy it, or open it in their own mail app. The app never sends
+ * mail on the user's behalf.
+ */
 export function ChatDraftEmail({ subject, body }: ChatDraftEmailProps) {
   const [draftSubject, setDraftSubject] = useState(subject);
   const [draftBody, setDraftBody] = useState(body);
@@ -23,6 +27,18 @@ export function ChatDraftEmail({ subject, body }: ChatDraftEmailProps) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       });
+  };
+
+  const openInMail = () => {
+    const href = `mailto:?subject=${encodeURIComponent(
+      draftSubject
+    )}&body=${encodeURIComponent(draftBody)}`;
+    window.open(href, "_blank");
+  };
+
+  const reset = () => {
+    setDraftSubject(subject);
+    setDraftBody(body);
   };
 
   return (
@@ -43,11 +59,10 @@ export function ChatDraftEmail({ subject, body }: ChatDraftEmailProps) {
         <Button size="sm" onClick={copy}>
           {copied ? "Copied ✓" : "Copy"}
         </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setDraftBody(body)}
-        >
+        <Button size="sm" variant="ghost" onClick={openInMail}>
+          Open in email app
+        </Button>
+        <Button size="sm" variant="ghost" onClick={reset}>
           Reset
         </Button>
       </div>
